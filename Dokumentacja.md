@@ -99,7 +99,11 @@ Jako [persona] [chcę], [aby]
 
 - Jako właściciel/pracownik chce mieć możliwość zobaczenia który pracownika finalizował daną transakcję
 
-Funkcjonalność:
+ <br>
+
+####Funkcjonalność:
+
+<br>
 
 -   Resetowanie stanu aktualnego na dystrybutorze po wykonaniu transakcji
     
