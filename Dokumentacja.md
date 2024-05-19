@@ -30,12 +30,12 @@ font-size: 8pt;
 
 ---
 
-  
+  <br>
   
 
 **Temat:** System Stacji Benzynowej “Zielona Krówka”
 
-  
+  <br>
 
 **Autorzy:** 
 - Marcin Wisz
@@ -45,24 +45,24 @@ font-size: 8pt;
 - Emilia Bania
 
 
-  
+<br>
 
 ---
 
-  
+<br>
 
 # 1. Zakres i krótki opis systemu
 
-  
+  <br>
 
 System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw,  system sprzedażowy.
 
-  
+  <br>
   
 
 # 2. Wymagania i funkcje systemu
 
-  
+  <br>
 
 Jako [persona] [chcę], [aby]
 
@@ -112,22 +112,22 @@ Funkcjonalność:
 # 3. Projekt bazy danych
 
   
-
+<br>
 ## Schemat bazy danych
 
 ![obraz](https://github.com/MarcinWisz-13/StacjaBenzynowa/assets/131010262/c26c1818-188d-4c0a-876c-946904f1434d)
 
-
+<br>
   
 
 (diagram (rysunek) przedstawiający schemat bazy danych)
 
-  
+  <br>
 
 ## Opis poszczególnych tabel
-
+<br>
 ### Nazwa tabeli: avalFuelInStation
-
+<br>
 - Opis: tabela odpowiedzialna za dostępność paliw w dystrybutorach 
 
 | Nazwa atrybutu | Typ | Długość | Opis/Uwagi |
@@ -136,9 +136,9 @@ Funkcjonalność:
 | fuelCode | varchar | 6 | PK - kod paliwa |
 
 ### Nazwa tabeli: contractors
-
+<br>
 - Opis: tabela odpowiedzialna za zgromadzenie informacji dostawców i klientów firmowych
-
+<br>
 | Nazwa atrybutu | Typ | Długość | Opis/Uwagi |
 | -------------- | --- | ------- | ---------- |
 | idContractorNIP | varchar | 15 | PK -   |
