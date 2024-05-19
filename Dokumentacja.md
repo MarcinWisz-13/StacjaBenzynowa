@@ -33,11 +33,17 @@ font-size: 8pt;
   
   
 
-**Temat:** (zwięzła nazwa projektowanego systemu)
+**Temat:** System Stacji Benzynowej “Zielona Krówka”
 
   
 
-**Autorzy:** (Imiona i nazwiska autorów)
+**Autorzy:** 
+- Marcin Wisz
+- Janusz Szczepanik
+- Artur Wlezień
+-  Jan Żbik
+- Emilia Bania
+
 
   
 
@@ -49,7 +55,7 @@ font-size: 8pt;
 
   
 
-(np. Cel projektu, słowny opis realizowanego systemu systemu)
+System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw,  system sprzedażowy.
 
   
   
@@ -58,7 +64,48 @@ font-size: 8pt;
 
   
 
-(np. lista wymagań, np. historyjki użytkownika, np. przypadki użycia itp.)
+Jako [persona] [chcę], [aby]
+
+- Jako klient chcę móc kupić dowolne paliwo w dowolnej ilości którą zmieszczę do baku/kanistra
+
+- Jako klient chce móc zatankować z dowolnego, aktualnie wolnego dystrybutora, który jest aktywny
+
+- Jako klient chcę zrobić zakup paliw na paragon
+
+- Jako klient firmowy chcę zrobić zakup na fakturę VAT
+
+- Jako pracownik chce móc wystawiać paragony/faktury bez względu jakie paliwa się na nim znajdą
+
+-  Jako pracownik, chcę móc widzieć, czy dany dystrybutor jest aktywny oraz czy nie wystąpiła awaria
+
+- Jako pracownik chce móc zobaczyć aktualną ilość wskazywaną poprzez licznik dystrybutora
+
+- Jako pracownik chce móc aktywować / zablokować dany dystrybutor
+
+- Jako pracownik chcę móc odblokować dystrybutor w przypadku “ucieczki” klienta bez płacenia
+
+- Jako pracownik, chcę móc podejrzeć aktualne stany magazynowe paliw
+
+- Jako właściciel/pracownik chce móc wpisać ilość dostarczonego paliwa i od którego dostawcy ono pochodzi
+
+- Jako właściciel chce mieć możliwość podglądu  ile paliwa zostało dostarczone przez każdego dostawce  w dowolnym okresie
+
+- Jako właściciel/pracownik chce mieć możliwość obejrzenia historii zamówień
+
+- Jako właściciel/pracownik chce mieć możliwość obejrzenia historii transakcji
+
+- Jako właściciel chcę móc sprawdzić dane pracowników
+
+- Jako właściciel/pracownik chce mieć możliwość zobaczenia który pracownika finalizował daną transakcję
+
+Funkcjonalność:
+
+-   Resetowanie stanu aktualnego na dystrybutorze po wykonaniu transakcji
+    
+-   W momencie transakcji automatyczna aktualizacja stanów magazynowych
+    
+-   Automatyczne dodanie ilości paliwa po odbiorze dostawy
+
 
   
 
@@ -67,6 +114,9 @@ font-size: 8pt;
   
 
 ## Schemat bazy danych
+
+![obraz](https://github.com/MarcinWisz-13/StacjaBenzynowa/assets/131010262/c26c1818-188d-4c0a-876c-946904f1434d)
+
 
   
 
