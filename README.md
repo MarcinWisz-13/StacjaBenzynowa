@@ -1,8 +1,4 @@
 
-
-  
-  
-
 <!-- <style>
 
 p,li {
@@ -25,20 +21,17 @@ font-size: 8pt;
 
 </style> -->
 
-  
-  
 
 ---
 
   <br>
   
-
 ## <p align='center'> System Stacji Benzynowej </p>
 ## <p align='center'> “Zielona Krówka” </p>
 
   <br>
 
-**Autorzy:** 
+### **Autorzy:** 
 - Emilia Bania
 - Janusz Szczepanik
 - Marcin Wisz
