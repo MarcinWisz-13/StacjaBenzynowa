@@ -112,7 +112,8 @@ Jako [persona] [chcę], [aby]
 -   Automatyczne dodanie ilości paliwa po odbiorze dostawy
 
 
-  
+  <br>
+  <br>
 
 # 3. Projekt bazy danych
 
