@@ -33,7 +33,8 @@ font-size: 8pt;
   <br>
   
 
-## <center>**Temat:** System Stacji Benzynowej “Zielona Krówka”
+## <p align='center'>System Stacji Benzynowej
+## “Zielona Krówka” </p>
 
   <br>
 
