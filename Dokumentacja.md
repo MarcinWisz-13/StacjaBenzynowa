@@ -38,11 +38,12 @@ font-size: 8pt;
   <br>
 
 **Autorzy:** 
-- Marcin Wisz
-- Janusz Szczepanik
-- Artur Wlezień
--  Jan Żbik
 - Emilia Bania
+- Janusz Szczepanik
+- Marcin Wisz
+- Artur Wlezień
+- Jan Żbik
+
 
 
 <br>
