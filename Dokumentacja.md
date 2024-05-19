@@ -103,7 +103,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 ### Funkcjonalność:
 
-<br>
+
 
 -   Resetowanie stanu aktualnego na dystrybutorze po wykonaniu transakcji
     
