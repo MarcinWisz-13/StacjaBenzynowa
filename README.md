@@ -33,8 +33,8 @@ font-size: 8pt;
   <br>
   
 
-## <p align='center'>System Stacji Benzynowej
-## “Zielona Krówka” </p>
+## <p align='center'> System Stacji Benzynowej </p>
+## <p align='center'> “Zielona Krówka” </p>
 
   <br>
 
