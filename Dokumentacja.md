@@ -56,7 +56,7 @@ font-size: 8pt;
 
   <br>
 
-System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw,  system sprzedażowy.
+System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz systemem sprzedażowym. Pozwala na sprzedaż, magazynowanie, przyjmowanie, raportowanie o aktualnych stanach, zamówieniach, pracownikach.
 
   <br>
   
