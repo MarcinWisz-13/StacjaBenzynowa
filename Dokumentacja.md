@@ -113,6 +113,7 @@ Funkcjonalność:
 
   
 <br>
+
 ## Schemat bazy danych
 
 ![obraz](https://github.com/MarcinWisz-13/StacjaBenzynowa/assets/131010262/c26c1818-188d-4c0a-876c-946904f1434d)
@@ -134,15 +135,23 @@ Funkcjonalność:
 
 - Opis: tabela odpowiedzialna za dostępność paliw w dystrybutorach 
 
+<br>
+
 | Nazwa atrybutu | Typ | Długość | Opis/Uwagi |
 | -------------- | --- | ------- | ---------- |
 | fuelStation | integer |  | PK - numer dystrybutora  |
 | fuelCode | varchar | 6 | PK - kod paliwa |
 
+<br>
+
 ### Nazwa tabeli: contractors
+
 <br>
+
 - Opis: tabela odpowiedzialna za zgromadzenie informacji dostawców i klientów firmowych
+
 <br>
+
 | Nazwa atrybutu | Typ | Długość | Opis/Uwagi |
 | -------------- | --- | ------- | ---------- |
 | idContractorNIP | varchar | 15 | PK -   |
@@ -154,10 +163,14 @@ Funkcjonalność:
 | email |varchar | 40 | email  |
 | contractorType | int |  | czy dostawca czy odbiorca |
 
+<br>
 
-#### Nazwa tabeli: employees
+### Nazwa tabeli: employees
+<br>
 
 - Opis: tabela odpowiedzialna za zgromadzenie informacji o pracownikach
+
+<br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
@@ -166,11 +179,15 @@ Funkcjonalność:
 | surname | varchar | 50 | Nazwisko pracownika |
 | idPosition | integer | | id stanowiska funkcyjnego pracownika|
 
+<br>
 
 ### Nazwa tabeli: fuelingDocuments
 
+<br>
+
 - Opis: tabela odpowiedzialna za przypisywanie dokumentu potwierdzającego płatność do każdej transakcji
 
+<br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
@@ -178,10 +195,15 @@ Funkcjonalność:
 | isInvoice | bit | | pole decydujące, czy pozycja przynależy do faktury czy paragonu ( 1 - faktura, 0 - paragon )
 | idDoc | int | | Odwołanie do id dokumentu handlowego który zawiera daną pozycję dokumentu tankowania |
 
+<br>
+
 ### Nazwa tabeli: fuelingHistory
+
+<br>
 
 - Opis: tabela odpowiedzialna za składowanie historii tankowań
 
+<br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
@@ -192,18 +214,30 @@ Funkcjonalność:
 |amountOfFuel| float | | Ile paliwa zatankowano w litrach |
 | isDisable | bit | | ???Czy zablokowany??? |
 
+<br>
+
 ### Nazwa tabeli: fuelNames
 
+<br>
+
 - Opis: tabela odpowiedzialna za składowanie nazw paliw
+
+<br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
 | fuelCode | varchar | 6 | PK - kod paliwa |
 | fuelName | varchar | 30 | nazwa paliwa |
 
+<br>
+
 ### Nazwa tabeli: fuelPriceHistory
 
+<br>
+
 - Opis: tabela odpowiedzialna za składowanie historii cen paliw
+
+<br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
@@ -212,9 +246,15 @@ Funkcjonalność:
 | fuelCode | varchar | 6 | Kod paliwa |
 | actualPrice | float | | Cena za litr paliwa |
 
+<br>
+
 ### Nazwa tabeli: fuelStorage
 
+<br>
+
 - Opis: tabela odpowiedzialna za składowanie nazw paliw
+
+<br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
@@ -223,10 +263,15 @@ Funkcjonalność:
 | fuelCurrLevel | float | | aktualny poziom paliwa w zbiorniku |
 | fuelMaxLevel | float | | pojemność zbiornika |
 
+<br>
+
 ### Nazwa tabeli: invoices
+
+<br>
 
 - Opis: tabela odpowiedzialna za składowanie wystawionych faktur
 
+<br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
@@ -239,22 +284,33 @@ Funkcjonalność:
 | totalPriceBrutto | float | | Wartość faktury brutto |
 |idEmployee | integer | | Kod pracownika wystawiającego dokument | 
 
+<br>
+
 ### Nazwa tabeli: orderDetails
 
+<br>
+
 - Opis: tabela odpowiedzialna za składowanie pozycji zamówień (ile, jakiego paliwa oraz w jakiej cenie)
+
+<br>
 
 | Nazwa atrybutu | Typ  |Długość | Opis/Uwagi |
 |----------------|------|--------|------------|
 | id   		 | int    |		| PK - klucz sztuczny, numer pojedynczej pozycji na zamówieniu            |
-| idOrder    | int    |	 | FK - Numer zamówienia           |
-| fuelCode   | varchar| 6| FK - Kod paliwa           |
+| idOrder    | int    |	 | Numer zamówienia           |
+| fuelCode   | varchar| 6| Kod paliwa           |
 | amountFuel |  float    || Ilość paliwa w litrach           |
 | pricePerLiter | float    || Cena za litr paliwa         |
 
+<br>
 
 ### Nazwa tabeli: orders
 
+<br>
+
 - Opis: tabela odpowiedzialna za składowanie zamówień (od kogo, kiedy zamówione, kiedy przyszło)
+
+<br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | - | - | - | - |
@@ -263,7 +319,11 @@ Funkcjonalność:
 | orderDate | datetime | | data zamówienia |
 | deliveryDate | datetime | | data otrzymania dostawy |
 
+<br>
+
 ### Nazwa tabeli: positionNames
+
+<br>
 
 - Opis: tabela odpowiedzialna za składowanie pozycji pracowników
 
@@ -272,9 +332,15 @@ Funkcjonalność:
 | idPosition | int | | PK - id pozycji pracownika
 | title | varchar | 30 | tytuł pracownika |
 
+<br>
+
 ### Nazwa tabeli: receipts
 
+<br>
+
 - Opis: tabela odpowiedzialna za składowanie wystawionych paragonów
+
+<br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | - | - | - | - |
