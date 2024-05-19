@@ -253,7 +253,7 @@ Funkcjonalność:
 
 <br>
 
-- Opis: tabela odpowiedzialna za składowanie nazw paliw
+- Opis: tabela odpowiedzialna za aktualne zasoby paliw
 
 <br>
 
