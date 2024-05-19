@@ -154,7 +154,7 @@ Funkcjonalność:
 
 | Nazwa atrybutu | Typ | Długość | Opis/Uwagi |
 | -------------- | --- | ------- | ---------- |
-| idContractorNIP | varchar | 15 | PK -   |
+| idContractorNIP | varchar | 15 | PK - id/NIP firmy  |
 | contractorName | varchar | 60 | nazwa firmy |
 | address | varchar | 60 | adres firmy |
 | address2 | varchar | 60 | dalszy adres firmy |
@@ -193,7 +193,7 @@ Funkcjonalność:
 | -------------- | ---- | ---------- | - |
 | idFueling | integer | | PK - id dokumentu tankowania |
 | isInvoice | bit | | pole decydujące, czy pozycja przynależy do faktury czy paragonu ( 1 - faktura, 0 - paragon )
-| idDoc | int | | Odwołanie do id dokumentu handlowego który zawiera daną pozycję dokumentu tankowania |
+| idDoc | integer | | Odwołanie do id dokumentu handlowego który zawiera daną pozycję dokumentu tankowania |
 
 <br>
 
@@ -259,9 +259,9 @@ Funkcjonalność:
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
 | fuelCode | varchar | 6 | PK - kod paliwa |
-| tankNumber | int | | numer zbiornika w którym znajduje się paliwo |
+| tankNumber | integer | | numer zbiornika w którym znajduje się paliwo |
 | fuelCurrLevel | float | | aktualny poziom paliwa w zbiorniku |
-| fuelMaxLevel | float | | pojemność zbiornika |
+| fuelMaxLevel | float | | maksymalna pojemność zbiornika |
 
 <br>
 
@@ -296,8 +296,8 @@ Funkcjonalność:
 
 | Nazwa atrybutu | Typ  |Długość | Opis/Uwagi |
 |----------------|------|--------|------------|
-| id   		 | int    |		| PK - klucz sztuczny, numer pojedynczej pozycji na zamówieniu            |
-| idOrder    | int    |	 | Numer zamówienia           |
+| id   		 | integer    |		| PK - klucz sztuczny, numer pojedynczej pozycji na zamówieniu            |
+| idOrder    | integer    |	 | Numer zamówienia           |
 | fuelCode   | varchar| 6| Kod paliwa           |
 | amountFuel |  float    || Ilość paliwa w litrach           |
 | pricePerLiter | float    || Cena za litr paliwa         |
@@ -314,7 +314,7 @@ Funkcjonalność:
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | - | - | - | - |
-| idOrder | int | | PK - id zamównienia |
+| idOrder | integer | | PK - id zamównienia |
 | contractorNIP | varchar | 15 | NIP dostawcy |
 | orderDate | datetime | | data zamówienia |
 | deliveryDate | datetime | | data otrzymania dostawy |
@@ -329,7 +329,7 @@ Funkcjonalność:
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | - | - | - | - |
-| idPosition | int | | PK - id pozycji pracownika
+| idPosition | integer | | PK - id stanowiska funkcyjnego pracownika |
 | title | varchar | 30 | tytuł pracownika |
 
 <br>
@@ -344,11 +344,11 @@ Funkcjonalność:
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | - | - | - | - |
-| idReceipt | int | | PK - id paragonu |
+| idReceipt | integer | | PK - id paragonu |
 | date | datetime | | data wystawienia paragonu
-| totalTax | float | | wartość podatku PTU |
-| totalPriceBrutto | float | | cena brutto
-| idEmployee | int | | FK - id pracownika
+| totalTax | float | | wartość PTU |
+| totalPriceBrutto | float | | wartość brutto
+| idEmployee | integer | | id pracownika |
 
 
 
