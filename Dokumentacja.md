@@ -120,14 +120,18 @@ Funkcjonalność:
 <br>
   
 
-(diagram (rysunek) przedstawiający schemat bazy danych)
 
-  <br>
+
+<br>
 
 ## Opis poszczególnych tabel
+
 <br>
+
 ### Nazwa tabeli: avalFuelInStation
+
 <br>
+
 - Opis: tabela odpowiedzialna za dostępność paliw w dystrybutorach 
 
 | Nazwa atrybutu | Typ | Długość | Opis/Uwagi |
