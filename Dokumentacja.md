@@ -65,7 +65,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
   <br>
 
-Jako [persona] [chcę], [aby]
+### Wymagania:
 
 - Jako klient chcę móc kupić dowolne paliwo w dowolnej ilości którą zmieszczę do baku/kanistra
 
@@ -101,7 +101,7 @@ Jako [persona] [chcę], [aby]
 
  <br>
 
-#### Funkcjonalność:
+### Funkcjonalność:
 
 <br>
 
