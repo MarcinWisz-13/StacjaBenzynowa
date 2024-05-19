@@ -101,7 +101,7 @@ Jako [persona] [chcę], [aby]
 
  <br>
 
-####Funkcjonalność:
+#### Funkcjonalność:
 
 <br>
 
