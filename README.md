@@ -116,7 +116,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 ## Schemat bazy danych
 
-![obraz](https://github.com/MarcinWisz-13/StacjaBenzynowa/assets/131010262/c26c1818-188d-4c0a-876c-946904f1434d)
+![obraz](C:\Users\Administrator\Desktop\schemat.jpg)
 
 <br>
   
@@ -129,20 +129,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
-### Nazwa tabeli: avalFuelInStation
 
-<br>
-
-- Opis: tabela odpowiedzialna za dostępność paliw w dystrybutorach 
-
-<br>
-
-| Nazwa atrybutu | Typ | Długość | Opis/Uwagi |
-| -------------- | --- | ------- | ---------- |
-| fuelStation | integer |  | PK - numer dystrybutora  |
-| fuelCode | varchar | 6 | PK - kod paliwa |
-
-<br>
 
 ### Nazwa tabeli: contractors
 
@@ -165,6 +152,21 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
+### Nazwa tabeli: docNumeration
+<br>
+
+- Opis: tabela typu słownikowego w której określamy styl szablon numeracji dokumentów poprzez prefix oraz sufix np: FS 01/2024/SPRZ gdzie FS jest prefixem a /SPRZ jest sufixem
+
+<br>
+
+| Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
+| -------------- | ---- | ---------- | - |
+| id | integer | | PK - id schematu |
+| prefix | varchar | 6 | Prefix szablonu |
+| sufix | varchar | 6 | Sufix szablonu |
+
+<br>
+
 ### Nazwa tabeli: employees
 <br>
 
@@ -177,25 +179,10 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | idEmployee | integer | | PK - id pracownika |
 | firstName | varchar | 30 | Imie pracownika |
 | surname | varchar | 50 | Nazwisko pracownika |
-| idPosition | integer | | id stanowiska funkcyjnego pracownika|
+| positionTitle | varchar | 30 | Nazwa stanowiska funkcyjnego pracownika|
 
 <br>
 
-### Nazwa tabeli: fuelingDocuments
-
-<br>
-
-- Opis: tabela odpowiedzialna za przypisywanie dokumentu potwierdzającego płatność do każdej transakcji
-
-<br>
-
-| Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
-| -------------- | ---- | ---------- | - |
-| idFueling | integer | | PK - id dokumentu tankowania |
-| isInvoice | bit | | pole decydujące, czy pozycja przynależy do faktury czy paragonu ( 1 - faktura, 0 - paragon )
-| idDoc | integer | | Odwołanie do id dokumentu handlowego który zawiera daną pozycję dokumentu tankowania |
-
-<br>
 
 ### Nazwa tabeli: fuelingHistory
 
@@ -208,28 +195,13 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
 |idFueling | integer | | PK - id tankowania |
-| stationNumber | integer| | Dystrybutor z którego tankowano |
-| fuelCode | varchar | 6 | Kod paliwa które zatankowano |
+| idPumpGun | integer | | id pistoletu z którego tankowano |
 |pricePerLiter | float | | Aktualna cena za którą tankowano|
 |amountOfFuel| float | | Ile paliwa zatankowano w litrach |
-| isDisable | bit | | ???Czy zablokowany??? |
+
 
 <br>
 
-### Nazwa tabeli: fuelNames
-
-<br>
-
-- Opis: tabela odpowiedzialna za składowanie nazw paliw
-
-<br>
-
-| Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
-| -------------- | ---- | ---------- | - |
-| fuelCode | varchar | 6 | PK - kod paliwa |
-| fuelName | varchar | 30 | nazwa paliwa |
-
-<br>
 
 ### Nazwa tabeli: fuelPriceHistory
 
@@ -244,7 +216,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | id | integer | | PK - klucz sztuczny, historia cen tankowania |
 | date | datetime | | Data zmiany ceny |
 | fuelCode | varchar | 6 | Kod paliwa |
-| actualPrice | float | | Cena za litr paliwa |
+| price | float | | Cena za litr paliwa |
 
 <br>
 
@@ -259,32 +231,14 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
 | fuelCode | varchar | 6 | PK - kod paliwa |
+| fuelName | varchar | 30 | Nazwa paliwa |
 | tankNumber | integer | | numer zbiornika w którym znajduje się paliwo |
 | fuelCurrLevel | float | | aktualny poziom paliwa w zbiorniku |
 | fuelMaxLevel | float | | maksymalna pojemność zbiornika |
 
 <br>
 
-### Nazwa tabeli: invoices
 
-<br>
-
-- Opis: tabela odpowiedzialna za składowanie wystawionych faktur
-
-<br>
-
-| Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
-| -------------- | ---- | ---------- | - |
-| idInvoice | integer | | PK - id faktury ( nie jej numer )|
-| invoiceNumber | varchar | 20 | Numer faktury w rozliczeniu rocznym |
-| date | datetime | | Data wystawienia dokumentu |
-| idCustomer | varchar | 15 | Numer nabywcy/odbiorcy (NIP)|
-|totalPriceNetto| float | | Wartość faktury netto |
-| totalTax | float | | Podatek VAT |
-| totalPriceBrutto | float | | Wartość faktury brutto |
-|idEmployee | integer | | Kod pracownika wystawiającego dokument | 
-
-<br>
 
 ### Nazwa tabeli: orderDetails
 
@@ -315,41 +269,55 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | - | - | - | - |
 | idOrder | integer | | PK - id zamównienia |
+| idOrderDoc | integer | | Numer dokumentu zamówienia |
 | contractorNIP | varchar | 15 | NIP dostawcy |
 | orderDate | datetime | | data zamówienia |
 | deliveryDate | datetime | | data otrzymania dostawy |
 
 <br>
 
-### Nazwa tabeli: positionNames
+
+
+### Nazwa tabeli: pumpGuns
 
 <br>
 
-- Opis: tabela odpowiedzialna za składowanie pozycji pracowników
-
-| Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
-| - | - | - | - |
-| idPosition | integer | | PK - id stanowiska funkcyjnego pracownika |
-| title | varchar | 30 | tytuł pracownika |
-
-<br>
-
-### Nazwa tabeli: receipts
-
-<br>
-
-- Opis: tabela odpowiedzialna za składowanie wystawionych paragonów
+- Opis: tabela składująca informację o konkretnych pistoletach do paliwa na danym dystrybutorze
 
 <br>
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | - | - | - | - |
-| idReceipt | integer | | PK - id paragonu |
-| date | datetime | | data wystawienia paragonu
-| totalTax | float | | wartość PTU |
-| totalPriceBrutto | float | | wartość brutto
-| idEmployee | integer | | id pracownika |
+| idPumpGun | integer | | PK - id pistoletu |
+| idStationNumber | integer | | Numer dystrybutora |
+| fuelCode | varchar | 6 | dostępne paliwo dla danego pistoletu |
+| inUse | bit | | czy pistolet w użyciu - podniesiony
+| transactionFinished | bit | | czy transakcja dla danego tankowania zakończona 1 - tak |
+| amountOfFuel | float | | Ilość zatankowanego paliwa |
+| idActualPrice | int | | id aktualnej ceny paliwa pobranej z tabeli fuelPriceHistory |
 
+
+### Nazwa tabeli: transactionDocuments
+
+<br>
+
+- Opis: tabela przechowująca wszystkie dokumenty transakcji
+
+<br>
+
+| Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
+| - | - | - | - |
+| id | integer | | PK - id dokumentu |
+| docType | integer | | Typ dokumentu 1 - paragon, 2 - faktura |
+| docTitleNumber | integer |  | Kolejny numer w numeracji dla danego typu dokumentu |
+| date | datetime | | Data wystawienia dokumentu |
+| idContractorNIP | varchar | 15 | NIP kontrachenta |
+| taxPTU | integer | | Stawka VAT wyrażona w % |
+| idFueling | integer | | id tankowania | 
+| idDocNumeration | integer | | id schematu numeracji dokumentu |
+| idEmployee | integer | | id pracownika wystawiającego dokument |
+
+<br>
 
 
 
@@ -366,23 +334,43 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 ## Kod poleceń DDL
 
   
+tabela "contractors"
+```
+CREATE TABLE [dbo].[contractors](
+	[idContractorNIP] [varchar](15) NOT NULL,
+	[contractorName] [varchar](60) NOT NULL,
+	[address] [varchar](60) NOT NULL,
+	[address2] [varchar](60) NULL,
+	[postalCode] [varchar](10) NOT NULL,
+	[contactNumber] [varchar](15) NULL,
+	[email] [varchar](40) NULL,
+	[contractorType] [int] NULL,
+ CONSTRAINT [PK_contractors] PRIMARY KEY CLUSTERED 
+(
+	[idContractorNIP] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
 
-(dla każdej tabeli należy wkleić kod DDL polecenia tworzącego tabelę)
+tabela "docNumeration"
 
-  
+```
+CREATE TABLE [dbo].[docNumeration](
+	[id] [int] NOT NULL,
+	[prefix] [varchar](6) NULL,
+	[sufix] [varchar](6) NULL,
+ CONSTRAINT [PK_docNumeration] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
 
-```sql
-
-create  table  tab1 (
-
-a int,
-
-b varchar(10)
-
-)
+tabela "employees"
 
 ```
 
+```
   
 
 ## Widoki
