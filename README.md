@@ -97,21 +97,17 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 ### Funkcjonalność:
 
-
-
 -   Resetowanie stanu aktualnego na dystrybutorze po wykonaniu transakcji
     
 -   W momencie transakcji automatyczna aktualizacja stanów magazynowych
     
 -   Automatyczne dodanie ilości paliwa po odbiorze dostawy
 
-
   <br>
   <br>
 
 # 3. Projekt bazy danych
 
-  
 <br>
 
 ## Schemat bazy danych
@@ -119,17 +115,11 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 ![obraz](C:\Users\Administrator\Desktop\schemat.jpg)
 
 <br>
-  
-
-
-
 <br>
 
 ## Opis poszczególnych tabel
 
 <br>
-
-
 
 ### Nazwa tabeli: contractors
 
@@ -152,7 +142,26 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
+### Nazwa tabeli: distStations
+
+<br>
+
+- Opis: tabela odpowiedzialna za spis wszystkich dystrybutorów
+
+<br>
+
+| Nazwa atrybutu | Typ | Długość | Opis/Uwagi |
+| -------------- | --- | ------- | ---------- |
+| idStationNumber | int | | PK - id dystrybutora |
+| activeGun | int | | numer aktualnie uzywanego pistoletu |
+| transactionFinished | bit | | wartosc pokazująca czy transakcja zostala zakonczona pomyslnie |
+| amountOfFuel | float | | ilosc zatankowanego paliwa |
+| idActualPrice | int | | aktualna cena z tabeli fuelPriceHistory |
+  
+<br>
+
 ### Nazwa tabeli: docNumeration
+
 <br>
 
 - Opis: tabela typu słownikowego w której określamy styl szablon numeracji dokumentów poprzez prefix oraz sufix np: FS 01/2024/SPRZ gdzie FS jest prefixem a /SPRZ jest sufixem
@@ -168,6 +177,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 <br>
 
 ### Nazwa tabeli: employees
+
 <br>
 
 - Opis: tabela odpowiedzialna za zgromadzenie informacji o pracownikach
@@ -183,7 +193,6 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
-
 ### Nazwa tabeli: fuelingHistory
 
 <br>
@@ -194,14 +203,13 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 | Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
 | -------------- | ---- | ---------- | - |
-|idFueling | integer | | PK - id tankowania |
+| idFueling | integer | | PK - id tankowania |
 | idPumpGun | integer | | id pistoletu z którego tankowano |
-|pricePerLiter | float | | Aktualna cena za którą tankowano|
-|amountOfFuel| float | | Ile paliwa zatankowano w litrach |
-
+| pricePerLiter | float | | Aktualna cena za którą tankowano|
+| amountOfFuel| float | | Ile paliwa zatankowano w litrach |
+| date | datetime | | data tankowania |
 
 <br>
-
 
 ### Nazwa tabeli: fuelPriceHistory
 
@@ -238,7 +246,21 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
+### Nazwa tabeli: losesHistory
 
+<br>
+
+- Opis: tabela odpowiedzialna za spis niezapłaconych tankowań
+
+<br>
+
+| Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
+| -------------- | ---- | ---------- | - |
+| idLose | int | | PK - id straty |
+| idFueling | int | | id rekordu tankowania |
+| carID | varchar | 20 | rejestracja samochodu który odjechał bez płacenia |
+
+<br>
 
 ### Nazwa tabeli: orderDetails
 
@@ -250,11 +272,11 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 | Nazwa atrybutu | Typ  |Długość | Opis/Uwagi |
 |----------------|------|--------|------------|
-| id   		 | integer    |		| PK - klucz sztuczny, numer pojedynczej pozycji na zamówieniu            |
-| idOrder    | integer    |	 | Numer zamówienia           |
-| fuelCode   | varchar| 6| Kod paliwa           |
-| amountFuel |  float    || Ilość paliwa w litrach           |
-| pricePerLiter | float    || Cena za litr paliwa         |
+| id | integer | | PK - klucz sztuczny, numer pojedynczej pozycji na zamówieniu |
+| idOrder | integer | | Numer zamówienia |
+| fuelCode | varchar| 6| Kod paliwa |
+| amountFuel | float  | | Ilość paliwa w litrach |
+| pricePerLiter | float | | Cena za litr paliwa |
 
 <br>
 
@@ -276,8 +298,6 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
-
-
 ### Nazwa tabeli: pumpGuns
 
 <br>
@@ -296,6 +316,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | amountOfFuel | float | | Ilość zatankowanego paliwa |
 | idActualPrice | int | | id aktualnej ceny paliwa pobranej z tabeli fuelPriceHistory |
 
+<br>
 
 ### Nazwa tabeli: transactionDocuments
 
@@ -319,23 +340,12 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
-
-
-
-
-
-
-  
-
 # 4. Implementacja
-
-  
 
 ## Kod poleceń DDL
 
-  
-tabela "contractors"
-```
+tabela "contractors" <br>
+```sql
 CREATE TABLE [dbo].[contractors](
 	[idContractorNIP] [varchar](15) NOT NULL,
 	[contractorName] [varchar](60) NOT NULL,
@@ -351,10 +361,22 @@ CREATE TABLE [dbo].[contractors](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-
-tabela "docNumeration"
-
+tabela "distStation" <br>
+```sql
+CREATE TABLE [dbo].[distStation](
+	[idStationNumber] [int] NOT NULL,
+	[activeGun] [int] NOT NULL,
+	[transactionFinished] [int] NOT NULL,
+	[amountOfFuel] [float] NOT NULL,
+	[idActualPrice] [int] NOT NULL,
+ CONSTRAINT [PK_distStation] PRIMARY KEY CLUSTERED 
+(
+	[idStationNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
 ```
+tabela "docNumeration" <br>
+```sql
 CREATE TABLE [dbo].[docNumeration](
 	[id] [int] NOT NULL,
 	[prefix] [varchar](6) NULL,
@@ -365,13 +387,133 @@ CREATE TABLE [dbo].[docNumeration](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-
-tabela "employees"
-
+tabela "employees" <br>
+```sql
+CREATE TABLE [dbo].[employees](
+	[idEmployee] [int] NOT NULL,
+	[firstName] [varchar](30) NOT NULL,
+	[surname] [varchar](50) NOT NULL,
+	[positionTitle] [varchar](30) NOT NULL,
+ CONSTRAINT [PK_employees] PRIMARY KEY CLUSTERED 
+(
+	[idEmployee] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
+tabela "fuelingHistory" <br>
+```sql
+CREATE TABLE [dbo].[fuelingHistory](
+	[idFueling] [int] IDENTITY(1,1) NOT NULL,
+	[idPumpGun] [int] NOT NULL,
+	[pricePerLiter] [float] NOT NULL,
+	[amountOfFuel] [float] NOT NULL,
+	[date] [datetime] NOT NULL,
+ CONSTRAINT [PK_fuelingHistory] PRIMARY KEY CLUSTERED 
+(
+	[idFueling] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
+tabela "fuelPriceHistory" <br>
+```sql
+CREATE TABLE [dbo].[fuelPriceHistory](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[date] [datetime] NOT NULL,
+	[fuelCode] [varchar](6) NOT NULL,
+	[price] [float] NOT NULL,
+ CONSTRAINT [PK_fuelPriceHistory_1] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
+tabela "fuelStorage" <br>
+```sql
+CREATE TABLE [dbo].[fuelStorage](
+	[fuelCode] [varchar](6) NOT NULL,
+	[fuelName] [varchar](30) NOT NULL,
+	[tankNumber] [int] NOT NULL,
+	[fuelCurrLevel] [float] NOT NULL,
+	[fuelMaxLevel] [float] NOT NULL,
+ CONSTRAINT [PK_fuelStorage] PRIMARY KEY CLUSTERED 
+(
+	[fuelCode] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
+tabela "losesHistory" <br>
+```sql
+CREATE TABLE [dbo].[losesHistory](
+	[idLose] [int] NOT NULL,
+	[idFueling] [int] NOT NULL,
+	[carID] [varchar](20) NULL,
+ CONSTRAINT [PK_losesHistory] PRIMARY KEY CLUSTERED 
+(
+	[idLose] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
+tabela "orderDetails" <br>
+```sql
+CREATE TABLE [dbo].[orderDetails](
+	[id] [int] NOT NULL,
+	[idOrder] [int] NOT NULL,
+	[fuelCode] [varchar](6) NOT NULL,
+	[amountFuel] [float] NOT NULL,
+	[pricePerLiter] [float] NOT NULL,
+ CONSTRAINT [PK_orderDetails] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
+tabela "orders" <br>
+```sql
+CREATE TABLE [dbo].[orders](
+	[idOrder] [int] NOT NULL,
+	[idOrderDoc] [int] NOT NULL,
+	[contractorNIP] [varchar](15) NULL,
+	[orderDate] [datetime] NULL,
+	[deliveryDate] [datetime] NULL,
+ CONSTRAINT [PK_orders] PRIMARY KEY CLUSTERED 
+(
+	[idOrder] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
+tabela "pumpGuns" <br>
+```sql
+CREATE TABLE [dbo].[pumpGuns](
+	[idPumpGun] [int] NOT NULL,
+	[idStationNumber] [int] NOT NULL,
+	[fuelCode] [varchar](6) NOT NULL,
+ CONSTRAINT [PK_pumpGuns] PRIMARY KEY CLUSTERED 
+(
+	[idPumpGun] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+```
+tabela "transactionDocuments" <br>
+```sql
+CREATE TABLE [dbo].[transactionDocuments](
+	[id] [int] NOT NULL,
+	[docType] [int] NOT NULL,
+	[docTitleNumber] [int] NOT NULL,
+	[date] [datetime] NOT NULL,
+	[idContractorNIP] [varchar](15) NULL,
+	[taxPTU] [int] NULL,
+	[paymentMethod] [int] NOT NULL,
+	[idFueling] [int] NOT NULL,
+	[idDocNumeration] [int] NOT NULL,
+	[idEmployee] [int] NOT NULL,
+ CONSTRAINT [PK_transactionDocuments] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
 ```
 
-```
-  
+<br>
 
 ## Widoki
 
