@@ -38,8 +38,6 @@ font-size: 8pt;
 - Artur Wlezień
 - Jan Żbik
 
-
-
 <br>
 
 ---
@@ -48,16 +46,15 @@ font-size: 8pt;
 
 # 1. Zakres i krótki opis systemu
 
-  <br>
+<br>
 
 System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz systemem sprzedażowym. Pozwala na sprzedaż, magazynowanie, przyjmowanie, raportowanie o aktualnych stanach, zamówieniach, pracownikach.
 
-  <br>
-  
+<br>
 
 # 2. Wymagania i funkcje systemu
 
-  <br>
+<br>
 
 ### Wymagania:
 
@@ -71,7 +68,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 - Jako pracownik chce móc wystawiać paragony/faktury bez względu jakie paliwa się na nim znajdą
 
--  Jako pracownik, chcę móc widzieć, czy dany dystrybutor jest aktywny oraz czy nie wystąpiła awaria
+- Jako pracownik, chcę móc widzieć, czy dany dystrybutor jest aktywny oraz czy nie wystąpiła awaria
 
 - Jako pracownik chce móc zobaczyć aktualną ilość wskazywaną poprzez licznik dystrybutora
 
@@ -93,7 +90,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 - Jako właściciel/pracownik chce mieć możliwość zobaczenia który pracownika finalizował daną transakcję
 
- <br>
+<br>
 
 ### Funkcjonalność:
 
@@ -103,8 +100,8 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
     
 -   Automatyczne dodanie ilości paliwa po odbiorze dostawy
 
-  <br>
-  <br>
+<br>
+<br>
 
 # 3. Projekt bazy danych
 
@@ -112,7 +109,8 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 ## Schemat bazy danych
 
-![obraz](C:\Users\Administrator\Desktop\schemat.jpg)
+![image](https://github.com/MarcinWisz-13/StacjaBenzynowa/assets/33297453/5bd828e1-7bbc-46bd-b322-9a27d5b5e6a2)
+
 
 <br>
 <br>
@@ -344,6 +342,8 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 ## Kod poleceń DDL
 
+<br>
+
 tabela "contractors" <br>
 ```sql
 CREATE TABLE [dbo].[contractors](
@@ -361,7 +361,10 @@ CREATE TABLE [dbo].[contractors](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "distStation" <br>
+
+<br>
+
+tabela "distStation"
 ```sql
 CREATE TABLE [dbo].[distStation](
 	[idStationNumber] [int] NOT NULL,
@@ -375,7 +378,10 @@ CREATE TABLE [dbo].[distStation](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "docNumeration" <br>
+
+<br>
+
+tabela "docNumeration"
 ```sql
 CREATE TABLE [dbo].[docNumeration](
 	[id] [int] NOT NULL,
@@ -387,7 +393,10 @@ CREATE TABLE [dbo].[docNumeration](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "employees" <br>
+
+<br>
+
+tabela "employees"
 ```sql
 CREATE TABLE [dbo].[employees](
 	[idEmployee] [int] NOT NULL,
@@ -400,7 +409,10 @@ CREATE TABLE [dbo].[employees](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "fuelingHistory" <br>
+
+<br>
+
+tabela "fuelingHistory"
 ```sql
 CREATE TABLE [dbo].[fuelingHistory](
 	[idFueling] [int] IDENTITY(1,1) NOT NULL,
@@ -414,7 +426,10 @@ CREATE TABLE [dbo].[fuelingHistory](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "fuelPriceHistory" <br>
+
+<br>
+
+tabela "fuelPriceHistory"
 ```sql
 CREATE TABLE [dbo].[fuelPriceHistory](
 	[id] [int] IDENTITY(1,1) NOT NULL,
@@ -427,7 +442,10 @@ CREATE TABLE [dbo].[fuelPriceHistory](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "fuelStorage" <br>
+
+<br>
+
+tabela "fuelStorage"
 ```sql
 CREATE TABLE [dbo].[fuelStorage](
 	[fuelCode] [varchar](6) NOT NULL,
@@ -441,7 +459,10 @@ CREATE TABLE [dbo].[fuelStorage](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "losesHistory" <br>
+
+<br>
+
+tabela "losesHistory"
 ```sql
 CREATE TABLE [dbo].[losesHistory](
 	[idLose] [int] NOT NULL,
@@ -453,7 +474,10 @@ CREATE TABLE [dbo].[losesHistory](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "orderDetails" <br>
+
+<br>
+
+tabela "orderDetails"
 ```sql
 CREATE TABLE [dbo].[orderDetails](
 	[id] [int] NOT NULL,
@@ -467,7 +491,10 @@ CREATE TABLE [dbo].[orderDetails](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "orders" <br>
+
+<br>
+
+tabela "orders"
 ```sql
 CREATE TABLE [dbo].[orders](
 	[idOrder] [int] NOT NULL,
@@ -481,7 +508,10 @@ CREATE TABLE [dbo].[orders](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "pumpGuns" <br>
+
+<br>
+
+tabela "pumpGuns"
 ```sql
 CREATE TABLE [dbo].[pumpGuns](
 	[idPumpGun] [int] NOT NULL,
@@ -493,7 +523,10 @@ CREATE TABLE [dbo].[pumpGuns](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 ```
-tabela "transactionDocuments" <br>
+
+<br>
+
+tabela "transactionDocuments"
 ```sql
 CREATE TABLE [dbo].[transactionDocuments](
 	[id] [int] NOT NULL,
@@ -517,22 +550,150 @@ CREATE TABLE [dbo].[transactionDocuments](
 
 ## Widoki
 
-  
+<br>
 
-(dla każdego widoku należy wkleić kod polecenia definiującego widok wraz z komentarzem)
+Widok: v_actualPrice - pokazuję najnowszą cenę paliwa wraz z datą aktualizacji ( aktualizowane trigerem??)
 
-  
+```sql
+CREATE VIEW [dbo].[v_actualPrice]
+AS
+SELECT
+	ph.date,
+	ph.fuelCode,
+	s.fuelName,
+	ph.price
+FROM
+	fuelPriceHistory ph
+INNER JOIN
+	fuelStorage  s ON ph.fuelCode = s.fuelCode
+```
+<br>
+
+Widok: v_contractorsOrders - widok pokazuję szczegółowe dane zamówień
+
+ ```sql
+CREATE VIEW [dbo].[v_contractorsOrders] AS
+SELECT 
+    o.idOrder,
+    o.idOrderDoc,
+    o.orderDate,
+    o.deliveryDate,
+    c.idContractorNIP,
+    c.contractorName,
+    c.address,
+    c.address2,
+    c.postalCode,
+    c.contactNumber,
+    c.email,
+    c.contractorType
+FROM 
+    orders o
+JOIN 
+    contractors c ON o.contractorNIP = c.idContractorNIP;
+```
+<br>
+
+Widok: v_employeePerformance - pokazuję wydajność sprzedażową danego pracownika
+
+ ```sql
+CREATE VIEW [dbo].[v_employeePerformance] AS
+SELECT 
+    e.idEmployee,
+    e.firstName,
+    e.surname,
+    e.positionTitle,
+    COUNT(td.id) AS transactionsCount,
+    SUM(fh.amountOfFuel) AS totalFuelSold,
+    SUM(fh.pricePerLiter * fh.amountOfFuel) AS totalSalesAmount
+FROM 
+    employees e
+JOIN 
+    transactionDocuments td ON e.idEmployee = td.idEmployee
+JOIN 
+    fuelingHistory fh ON td.idFueling = fh.idFueling
+GROUP BY 
+    e.idEmployee, e.firstName, e.surname, e.positionTitle;
+```
+<br>
+
+Widok: v_fuelingDetails - pokazuje aktalną sprzedaż każdego paliwa (które najszybciej się sprzedaję)
+
+```sql
+CREATE VIEW [dbo].[v_fuelingDetails]
+AS
+SELECT
+	fh.idFueling,
+	fh.idPumpGun,
+	fh.pricePerLiter,
+	fh.amountOfFuel,
+	fh.date,
+	pg.fuelCode,
+	pg.idStationNumber
+FROM
+	dbo.fuelingHistory fh
+INNER JOIN
+    dbo.pumpGuns pg ON fh.idPumpGun = pg.idPumpGun
+```
+
+<br>
 
 ## Procedury/funkcje
 
-  
+p_fuelPriceUpdate 
+    @FuelCode VARCHAR(6),
+    @NewPrice float
 
-(dla każdej procedury/funkcji należy wkleić kod polecenia definiującego procedurę wraz z komentarzem)
+p_fuelLevelUpdate  
+	@FuelCode VARCHAR(6),
+    @AmountOfFuel float,
+	@isDelivery bit
 
-  
+p_startFueling
+	@ActiveGun int
+
+
+p_endFueling
+	@ActiveGun int
+
+p_genLoseDoc
+	@IDFueling ??
+
+p_genTransactionDoc
+	@IDFueling ??
+	@DocType int
+	@IDContractor varchar(15)
+	@IDEmployee int
+	@IDDocNumeration
+	@TaxPTU
+	@PaymentMethod
+
+
+p_addContractor
+
+
+p_addOrder  
+	@ContractorNIP
+	@
+
+p_confirmOrder
 
 ## Triggery
+
 
   
 
 (dla każdego triggera należy wkleić kod polecenia definiującego trigger wraz z komentarzem)
+
+
+## Constrains
+
+fuelPriceHistory - price > 0
+
+distStation - amountOfFuel >= 0
+distStation - activeGun <= 16
+
+fuelStorage - fuelCurrLevel < fuelMaxLevel
+fuelStorage - fuelCurrLevel > 0
+
+orderDetails - amountOfFuel > 0
+oderdDetails - pricePerLiter >= 0
