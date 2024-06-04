@@ -552,20 +552,17 @@ CREATE TABLE [dbo].[transactionDocuments](
 
 <br>
 
-Widok: v_actualPrice - pokazuję najnowszą cenę paliwa wraz z datą aktualizacji ( aktualizowane trigerem??)
+Widok: v_actualPrice - pokazuję najnowszą cenę paliw wraz z datą aktualizacji 
 
 ```sql
 CREATE VIEW [dbo].[v_actualPrice]
 AS
-SELECT
-	ph.date,
-	ph.fuelCode,
-	s.fuelName,
-	ph.price
-FROM
-	fuelPriceHistory ph
-INNER JOIN
-	fuelStorage  s ON ph.fuelCode = s.fuelCode
+SELECT        date, fuelCode, price, id
+FROM            dbo.fuelPriceHistory AS fph
+WHERE        (date =
+                    (SELECT MAX(date) AS Expr1
+                    FROM dbo.fuelPriceHistory
+                    WHERE (fuelCode = fph.fuelCode)))
 ```
 <br>
 
@@ -605,14 +602,10 @@ SELECT
     COUNT(td.id) AS transactionsCount,
     SUM(fh.amountOfFuel) AS totalFuelSold,
     SUM(fh.pricePerLiter * fh.amountOfFuel) AS totalSalesAmount
-FROM 
-    employees e
-JOIN 
-    transactionDocuments td ON e.idEmployee = td.idEmployee
-JOIN 
-    fuelingHistory fh ON td.idFueling = fh.idFueling
-GROUP BY 
-    e.idEmployee, e.firstName, e.surname, e.positionTitle;
+FROM employees e
+JOIN transactionDocuments td ON e.idEmployee = td.idEmployee
+JOIN fuelingHistory fh ON td.idFueling = fh.idFueling
+GROUP BY e.idEmployee, e.firstName, e.surname, e.positionTitle;
 ```
 <br>
 
@@ -629,53 +622,220 @@ SELECT
 	fh.date,
 	pg.fuelCode,
 	pg.idStationNumber
-FROM
-	dbo.fuelingHistory fh
-INNER JOIN
-    dbo.pumpGuns pg ON fh.idPumpGun = pg.idPumpGun
+FROM dbo.fuelingHistory fh
+INNER JOIN dbo.pumpGuns pg ON fh.idPumpGun = pg.idPumpGun
 ```
 
 <br>
 
+Widok: v_FuelTypeSummary - pokazuje aktualną sprzedaż w podziale na dane paliwo
+
+```sql
+CREATE VIEW [dbo].[v_FuelTypeSummary] AS
+SELECT 
+    pg.fuelCode,
+    fs.fuelName,
+    SUM(fh.amountOfFuel) AS totalAmountOfFuel
+FROM fuelingHistory fh
+JOIN pumpGuns pg ON fh.idPumpGun = pg.idPumpGun
+JOIN fuelStorage fs ON pg.fuelCode = fs.fuelCode
+GROUP BY pg.fuelCode, fs.fuelName;
+```
+
+<br>
+
+Widok: v_invoiceSummary - widok pokazujący wszystkie faktury wraz z wartością
+
+```sql
+CREATE   VIEW [dbo].[v_invoiceSummary]
+AS
+SELECT
+dn.prefix + '/' + CAST(td.docTitleNumber as varchar)+  '/' + RIGHT(CONVERT(varchar,td.date , 103),7)  +
+	( CASE WHEN sufix LIKE '' THEN '' ELSE '/'+sufix END )  as docTitle,
+c.idContractorNIP as NIP,
+c.contractorName ,
+pg.fuelCode,
+fh.amountOfFuel , 
+FORMAT(ROUND(fh.pricePerLiter * (1 - (CAST(td.taxPTU as FLOAT) / 100)) ,2) , 'N2') as nettoPerLiter,
+FORMAT(ROUND(fh.pricePerLiter , 2), 'N2') as bruttoPerLiter,
+FORMAT(ROUND( fh.pricePerLiter * fh.amountOfFuel * (1 - (CAST(td.taxPTU as FLOAT) / 100)) , 2), 'N2')  as Netto, 
+FORMAT(ROUND((fh.pricePerLiter * fh.amountOfFuel) - (fh.pricePerLiter * fh.amountOfFuel * (1 - (CAST(td.taxPTU as FLOAT) / 100))),2),'N2') AS TotalTax,
+FORMAT(ROUND(fh.pricePerLiter * fh.amountOfFuel , 2 ), 'N2') as Brutto
+FROM transactionDocuments as td
+INNER JOIN fuelingHistory as fh ON td.idFueling = fh.idFueling
+INNER JOIN pumpGuns as pg ON fh.idPumpGun = pg.idPumpGun
+INNER JOIN docNumeration as dn ON td.idDocNumeration = dn.id
+INNER JOIN contractors as c ON td.idContractorNIP= c.idContractorNIP
+```
+
+<br>
+
+Widok: v_orderSummaryView - pokazuje podsumowanie zamówień
+
+```sql
+CREATE VIEW [dbo].[v_orderSummaryView]
+AS
+SELECT 
+    o.idOrder,
+    o.idOrderDoc,
+    o.contractorNIP,
+    o.orderDate,
+    o.deliveryDate,
+    SUM(od.amountFuel * od.pricePerLiter) AS TotalPrice
+FROM dbo.orders o
+JOIN dbo.orderDetails od ON o.idOrder = od.idOrder
+GROUP BY 
+    o.idOrder,
+    o.idOrderDoc,
+    o.contractorNIP,
+    o.orderDate,
+    o.deliveryDate;
+```
+
+<br>
+
+Widok: v_receiptSummary - pokazuje zestawienie wszystkich paragonów
+
+```sql
+CREATE VIEW [dbo].[v_receiptSummary]
+AS
+
+SELECT
+dn.prefix + '/' + CAST(td.docTitleNumber as varchar)+  '/' + RIGHT(CONVERT(varchar,td.date , 103),7)  +
+	( CASE WHEN sufix LIKE '' THEN '' ELSE '/'+sufix END )  as docTitle,
+pg.fuelCode ,
+fh.amountOfFuel , 
+FORMAT(ROUND(fh.pricePerLiter * (1 - (CAST(td.taxPTU as FLOAT) / 100)) ,2) , 'N2') as nettoPerLiter,
+FORMAT(ROUND(fh.pricePerLiter , 2), 'N2') as bruttoPerLiter,
+FORMAT(ROUND(fh.pricePerLiter * fh.amountOfFuel * (1 - (CAST(td.taxPTU as FLOAT) / 100)) , 2), 'N2')  as Netto, 
+FORMAT(ROUND((fh.pricePerLiter * fh.amountOfFuel) - (fh.pricePerLiter * fh.amountOfFuel * (1 - (CAST(td.taxPTU as FLOAT) / 100))),2),'N2') AS TotalTax,
+FORMAT(ROUND(fh.pricePerLiter * fh.amountOfFuel , 2 ), 'N2') as Brutto
+FROM transactionDocuments as td
+INNER JOIN fuelingHistory as fh ON td.idFueling = fh.idFueling
+INNER JOIN pumpGuns as pg ON fh.idPumpGun = pg.idPumpGun
+INNER JOIN docNumeration as dn ON td.idDocNumeration = dn.id
+WHERE td.docType = 1
+```
+
 ## Procedury/funkcje
 
-p_fuelPriceUpdate 
-    @FuelCode VARCHAR(6),
-    @NewPrice float
 
-p_fuelLevelUpdate  
-	@FuelCode VARCHAR(6),
-    @AmountOfFuel float,
-	@isDelivery bit
+Procedura: p_addContractor - dodaje kontrachenta z weryfikacją podanych danych
 
-p_startFueling
-	@ActiveGun int
+```sql
 
+```
 
-p_endFueling
-	@ActiveGun int
+<br>
 
-p_genLoseDoc
-	@IDFueling ??
+Procedura: p_addEmptyOrder - dodaj zamówienie - tworzy "koszyk"
 
-p_genTransactionDoc
-	@IDFueling ??
-	@DocType int
-	@IDContractor varchar(15)
-	@IDEmployee int
-	@IDDocNumeration
-	@TaxPTU
-	@PaymentMethod
+```sql
+
+```
+
+<br>
 
 
-p_addContractor
+Procedura: p_addFuelToOrder - dodaj paliwo do utworzonego wcześniej zamówienia - "koszyka"
+
+```sql
+
+```
+
+<br>
+
+Procedura: p_collectOrder - odbierz zamówienie - potwierdzamy dostawe paliw - aktualizuje stany magazynowe
+
+```sql
+
+```
+
+<br>
+
+
+Procedura: p_confirmOrder - potwierdzamy wysłanie zamówienia - czyli zamykamy koszyk ale bez potwierdzenia odbioru
+
+```sql
+
+```
+
+<br>
+
+
+Procedura: p_endFueling - koniec tankowania - wyzwalane odłożeniem pistoletu przy dystrybutorze na swoje miejscie
+
+```sql
+
+```
+
+<br>
+
+
+Procedura: p_fuelLevelUpdate - procedura obsługujaca ruch magazynowy w magazynie paliw
+
+```sql
+
+```
+
+<br>
+
+
+Procedura: p_fuelPriceUpdate - aktualizacja ceny dla danego paliwa
+
+```sql
+
+```
+
+<br>
+
+
+Procedura: p_genLose - generowanie dokumentu strat - powiązane z konkretnym tankowaniem z fuelingHistory
+
+```sql
+
+```
+
+<br>
+
+
+Procedura: p_genTransactionDoc - generowanie dokumentu sprzedażowego
+
+```sql
+
+```
+
+<br>
+
+
+Procedura: p_startFueling - rozpoczęcie tankowania - aktywowane podniesiem pistoletu przy dystrybutorze
+
+```sql
+
+```
+
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 p_addOrder  
-	@ContractorNIP
-	@
 
-p_confirmOrder
+
+
 
 ## Triggery
 
