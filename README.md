@@ -716,9 +716,11 @@ INNER JOIN pumpGuns as pg ON fh.idPumpGun = pg.idPumpGun
 INNER JOIN docNumeration as dn ON td.idDocNumeration = dn.id
 WHERE td.docType = 1
 ```
+<br><br><br>
 
 ## Procedury/funkcje
 
+<br>
 
 Procedura: p_addContractor - dodaje kontrachenta z weryfikacją podanych danych
 
@@ -814,25 +816,9 @@ Procedura: p_startFueling - rozpoczęcie tankowania - aktywowane podniesiem pist
 
 ```
 
-<br>
+<br><br><br>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-p_addOrder  
 
 
 
