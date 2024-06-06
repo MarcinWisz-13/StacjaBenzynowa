@@ -37,7 +37,6 @@ font-size: 8pt;
 - Marcin Wisz
 - Artur Wlezień
 - Jan Żbik
-- dostep
 
 <br>
 
