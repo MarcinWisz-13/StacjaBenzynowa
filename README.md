@@ -1236,6 +1236,87 @@ END;
 ### Procedura: p_fuelLevelUpdate - procedura obsługujaca ruch magazynowy w magazynie paliw
 
 ```sql
+CREATE PROCEDURE [dbo].[p_fuelLevelUpdate]
+    @FuelCode VARCHAR(6),
+    @AmountOfFuel float,
+	@isDelivery bit
+	AS
+	BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+       
+	DECLARE @FuelCurrLevel float;
+	DECLARE @FuelMaxLevel float;
+
+	select @FuelCurrLevel = fuelCurrLevel
+	from fuelStorage
+	where fuelCode = @FuelCode;
+
+	select @FuelMaxLevel = fuelMaxLevel
+	from fuelStorage 
+	where fuelCode = @FuelCode;
+
+	if @isDelivery = 0										  -- jeśli 0 to znaczy że ktoś pobiera paliwo
+		BEGIN												  
+		SET @FuelCurrLevel = @FuelCurrLevel - @AmountOfFuel;  -- ustawienie poziomu paliwa po odjęciu
+		
+		if @fuelCurrLevel < 0								  -- sprawdzenie czy poziom nie jest za niski
+			BEGIN
+				PRINT 'Za niski poziom paliwa';					  -- jeśli jest za niski to błąd
+				THROW 50008, 'Za niski poziom paliwa', 1;
+			END
+		else
+			BEGIN											  -- jeśli jest ok, to update na tabeli
+				update fuelStorage
+				set fuelCurrLevel = @FuelCurrLevel
+				where fuelCode = @FuelCode;
+			END
+
+		END
+	else
+		BEGIN													--else czyli 1 - dostawa paliwa, zwiększamy poziom w zbiorniku
+			BEGIN												  
+			SET @FuelCurrLevel = @FuelCurrLevel + @AmountOfFuel;  -- ustawienie poziomu paliwa po odjęciu
+			if @fuelCurrLevel > @FuelMaxLevel								  -- sprawdzenie czy poziom nie jest za wysoki
+				BEGIN
+					PRINT 'Za wysoki poziom paliwa';					  -- jeśli jest za wysoki - błąd 
+					THROW 50008, 'Za wysoki poziom paliwa', 1;
+				END
+			else
+				BEGIN											  -- jeśli jest ok, to update na tabeli
+					update fuelStorage
+					set fuelCurrLevel = @fuelCurrLevel
+					where fuelCode = @FuelCode;
+				END
+
+		END
+		END
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
+
+
 
 ```
 
@@ -1245,6 +1326,49 @@ END;
 ### Procedura: p_fuelPriceUpdate - aktualizacja ceny dla danego paliwa
 
 ```sql
+CREATE PROCEDURE [dbo].[p_fuelPriceUpdate]
+    @fuelCode VARCHAR(6),
+    @NewPrice float
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+
+		IF @NewPrice > 0 AND EXISTS (SELECT 1 FROM fuelStorage where fuelCode = @fuelCode)
+		BEGIN
+			insert into fuelPriceHistory (date, fuelCode, price)
+			values (GETDATE(), @fuelCode, @NewPrice)
+		END
+		ELSE
+			BEGIN
+			PRINT 'Błąd parametrów';
+			THROW 50008, 'Błąd parametrów', 1;
+			END
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
+
 
 ```
 
@@ -1254,7 +1378,64 @@ END;
 ### Procedura: p_genLose - generowanie dokumentu strat - powiązane z konkretnym tankowaniem z fuelingHistory
 
 ```sql
+CREATE   PROCEDURE [dbo].[p_genLose]
+    @IDFueling int,
+	@CarID varchar (20) = NULL
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
 
+    BEGIN TRY
+
+	DECLARE @StationNumber int;
+
+	--select @PumpGun = idPumpGun							--pobranie numeru pistoletu z idFueling
+	--from fuelingHistory
+	--where idFueling = @IDFueling;
+
+	--select @StationNumber = pg.idStationNumber				--pobranie do zmiennej station number na podstawie numeru pistoletu
+    --from pumpGuns pg
+	--join distStation ds ON ds.idStationNumber = pg.idStationNumber 
+   	--where pg.idPumpGun = @PumpGun
+
+	select @StationNumber = pg.idStationNumber				--pobranie do zmiennej station number na podstawie numeru tankowania
+    from pumpGuns pg
+	join fuelingHistory fh ON fh.idPumpGun = pg.idPumpGun
+	join distStation ds ON ds.idStationNumber = pg.idStationNumber 
+   	where fh.idFueling = @IDFueling
+
+
+	insert into losesHistory (idFueling, carID) values
+	(@IDFueling, @CarID);
+
+	update distStation
+	set transactionFinished = 1, activeGun = 0
+	where idStationNumber = @StationNumber;
+
+
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
 ```
 
 <br>
@@ -1263,7 +1444,97 @@ END;
 ### Procedura: p_genTransactionDoc - generowanie dokumentu sprzedażowego
 
 ```sql
+CREATE   PROCEDURE [dbo].[p_genTransactionDocument]
+	@DocType int,
+	@IDContractorNIP varchar (15),
+	@TaxPTU int,
+	@PaymentMethod int,
+	@Distributor int,
+	@IDDocNumeration int,
+	@IDEmployee int
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
 
+    BEGIN TRY
+
+	DECLARE @LastTitleNumber int;		--pobieranie ostatniej wartości licznika dla danego dokumentu
+	DECLARE @LastDate datetime;
+	DECLARE @IDFueling int;				--przechowywanie id fueling pobrane po @Distributor
+
+	IF (@DocType = 1 or @DocType = 2) AND 
+	EXISTS (SELECT 1 FROM contractors where idContractorNIP = @IDContractorNIP) AND 
+	(@PaymentMethod BETWEEN 1 AND 3)  AND 
+	EXISTS (SELECT 1 FROM distStation where idStationNumber = @Distributor) AND
+	EXISTS (SELECT 1 FROM employees where idEmployee = @IDEmployee)
+	BEGIN
+
+	select top 1 @LastTitleNumber = docTitleNumber	--wczytywanie ostatniego numeru dokumentu i inkrementacja
+	from transactionDocuments
+	where docType = @DocType
+	order by docTitleNumber DESC;
+
+	select @LastDate = date							--pobieranie daty ostatniego dokumentu
+	from transactionDocuments
+	where docType = @DocType AND docTitleNumber = @LastTitleNumber;
+
+	if (MONTH(GETDATE()) = MONTH(@LastDate))		--jeśli miesiąc na ostatnim dokumencie jest inny, zeruj licznik do 1
+	BEGIN
+		SET @LastTitleNumber = @LastTitleNumber + 1; 
+		PRINT @LastTitleNumber;
+	END
+	else
+	BEGIN
+		SET @LastTitleNumber = 1;
+		PRINT @LastTitleNumber;
+	END
+	
+
+	select @IDFueling = idFueling							--wyciąganie idFueling po numerze dystrybutora
+	from distStation ds
+	join pumpGuns pg ON ds.idStationNumber = pg.idStationNumber
+	join fuelingHistory fh ON pg.idPumpGun = fh.idPumpGun
+	where ds.idStationNumber = @Distributor AND activeGun != 0
+
+
+
+	--utworzenie dokumentu
+	insert into transactionDocuments (docType, docTitleNumber, date, idContractorNIP, taxPTU, paymentMethod, idFueling, idDocNumeration, idEmployee) values
+	(@DocType, @LastTitleNumber, GETDATE(), @IDContractorNIP, @TaxPTU, @PaymentMethod, @IDFueling, @IDDocNumeration, @IDEmployee);
+
+	update distStation								--konczenie transakcji
+	set activeGun = 0, transactionFinished = 1
+	where idStationNumber = @Distributor;
+
+	END
+	ELSE
+		BEGIN
+		PRINT 'Błąd parametrów';
+		THROW 50008, 'Błąd parametrów', 1;
+		END
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
 ```
 
 <br>
@@ -1272,7 +1543,70 @@ END;
 ### Procedura: p_startFueling - rozpoczęcie tankowania - aktywowane podniesiem pistoletu przy dystrybutorze
 
 ```sql
+CREATE PROCEDURE [dbo].[p_startFueling]
+    @ActiveGun int
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
 
+    BEGIN TRY
+
+		IF ((select transactionFinished from distStation where activeGun = @ActiveGun) = 0) 
+		BEGIN
+			PRINT 'Dystrybutor zajęty';
+			THROW 50011, 'Dystrybutor zajęty', 1;
+		END
+		ELSE
+		BEGIN
+		   DECLARE @FuelCode varchar(6);
+		   DECLARE @IDActualPrice int;
+		   DECLARE @StationNumber int;
+
+		   select @FuelCode = fuelCode				--pobieranie FuelCode
+		   from pumpGuns 
+		   where idPumpGun = @ActiveGun;
+
+		   select @IDActualPrice = id				--pobieranie ceny
+		   from v_actualPrice
+		   where fuelCode = @FuelCode;
+
+
+		   select @StationNumber = pg.idStationNumber		--ustalenie dystrybutora
+		   from pumpGuns pg
+		   join distStation ds ON ds.idStationNumber = pg.idStationNumber 
+   		   where pg.idPumpGun = @ActiveGun
+
+		   update distStation 
+		   set amountOfFuel = 0, idActualPrice = @IDActualPrice, activeGun = @ActiveGun
+		   where idStationNumber = @StationNumber
+		END
+
+
+
+	
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
 ```
 
 <br><br><br>
