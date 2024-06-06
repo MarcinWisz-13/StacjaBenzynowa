@@ -712,25 +712,34 @@ GROUP BY pg.fuelCode, fs.fuelName;
 ### Widok: v_invoiceSummary - widok pokazujący wszystkie faktury wraz z wartością
 
 ```sql
-CREATE   VIEW [dbo].[v_invoiceSummary]
+CREATE VIEW [dbo].[v_invoiceSummary]
 AS
+WITH p as (SELECT idFueling, fh.pricePerLiter * fh.amountOfFuel as totalBrutto FROM fuelingHistory as fh)
+
 SELECT
 dn.prefix + '/' + CAST(td.docTitleNumber as varchar)+  '/' + RIGHT(CONVERT(varchar,td.date , 103),7)  +
-	( CASE WHEN sufix LIKE '' THEN '' ELSE '/'+sufix END )  as docTitle,
+	( CASE WHEN sufix LIKE '' THEN ''
+		ELSE '/'+sufix END 
+		 )  as docTitle,
 c.idContractorNIP as NIP,
-c.contractorName ,
+c.contractorName as contractorName,
 pg.fuelCode,
 fh.amountOfFuel , 
 FORMAT(ROUND(fh.pricePerLiter * (1 - (CAST(td.taxPTU as FLOAT) / 100)) ,2) , 'N2') as nettoPerLiter,
 FORMAT(ROUND(fh.pricePerLiter , 2), 'N2') as bruttoPerLiter,
-FORMAT(ROUND( fh.pricePerLiter * fh.amountOfFuel * (1 - (CAST(td.taxPTU as FLOAT) / 100)) , 2), 'N2')  as Netto, 
-FORMAT(ROUND((fh.pricePerLiter * fh.amountOfFuel) - (fh.pricePerLiter * fh.amountOfFuel * (1 - (CAST(td.taxPTU as FLOAT) / 100))),2),'N2') AS TotalTax,
-FORMAT(ROUND(fh.pricePerLiter * fh.amountOfFuel , 2 ), 'N2') as Brutto
+FORMAT(ROUND( p.totalBrutto * (1 - (CAST(td.taxPTU as FLOAT) / 100)) , 2), 'N2')  as Netto, 
+FORMAT(ROUND((p.totalBrutto) - (p.totalBrutto* (1 - (CAST(td.taxPTU as FLOAT) / 100))),2),'N2') AS TotalTax,
+FORMAT(ROUND(p.totalBrutto , 2 ), 'N2') as Brutto,
+CONVERT(varchar,td.date,104) as docDate
 FROM transactionDocuments as td
 INNER JOIN fuelingHistory as fh ON td.idFueling = fh.idFueling
 INNER JOIN pumpGuns as pg ON fh.idPumpGun = pg.idPumpGun
 INNER JOIN docNumeration as dn ON td.idDocNumeration = dn.id
 INNER JOIN contractors as c ON td.idContractorNIP= c.idContractorNIP
+INNER JOIN p ON fh.idFueling = p.idFueling
+WHERE td.docType = 2
+
+GO
 ```
 
 <br>
@@ -764,22 +773,27 @@ GROUP BY
 ```sql
 CREATE VIEW [dbo].[v_receiptSummary]
 AS
-
+WITH p as (SELECT idFueling, fh.pricePerLiter * fh.amountOfFuel as totalBrutto FROM fuelingHistory as fh)
 SELECT
 dn.prefix + '/' + CAST(td.docTitleNumber as varchar)+  '/' + RIGHT(CONVERT(varchar,td.date , 103),7)  +
-	( CASE WHEN sufix LIKE '' THEN '' ELSE '/'+sufix END )  as docTitle,
+	( CASE WHEN sufix LIKE '' THEN ''
+		ELSE '/'+sufix END 
+		 )  as docTitle,
 pg.fuelCode ,
 fh.amountOfFuel , 
-FORMAT(ROUND(fh.pricePerLiter * (1 - (CAST(td.taxPTU as FLOAT) / 100)) ,2) , 'N2') as nettoPerLiter,
+--FORMAT(ROUND(fh.pricePerLiter * (1 - (CAST(td.taxPTU as FLOAT) / 100)) ,2) , 'N2') as nettoPerLiter,
 FORMAT(ROUND(fh.pricePerLiter , 2), 'N2') as bruttoPerLiter,
-FORMAT(ROUND(fh.pricePerLiter * fh.amountOfFuel * (1 - (CAST(td.taxPTU as FLOAT) / 100)) , 2), 'N2')  as Netto, 
-FORMAT(ROUND((fh.pricePerLiter * fh.amountOfFuel) - (fh.pricePerLiter * fh.amountOfFuel * (1 - (CAST(td.taxPTU as FLOAT) / 100))),2),'N2') AS TotalTax,
-FORMAT(ROUND(fh.pricePerLiter * fh.amountOfFuel , 2 ), 'N2') as Brutto
+--FORMAT(ROUND(p.totalBrutto * (1 - (CAST(td.taxPTU as FLOAT) / 100)) , 2), 'N2')  as Netto, 
+FORMAT(ROUND((p.totalBrutto) - (p.totalBrutto * (1 - (CAST(td.taxPTU as FLOAT) / 100))),2),'N2') AS TotalTax,
+FORMAT(ROUND(p.totalBrutto , 2 ), 'N2') as Brutto,
+CONVERT(varchar,td.date,104) as docDate
 FROM transactionDocuments as td
 INNER JOIN fuelingHistory as fh ON td.idFueling = fh.idFueling
 INNER JOIN pumpGuns as pg ON fh.idPumpGun = pg.idPumpGun
 INNER JOIN docNumeration as dn ON td.idDocNumeration = dn.id
+INNER JOIN p ON fh.idFueling = p.idFueling
 WHERE td.docType = 1
+GO
 ```
 <br><br><br>
 
