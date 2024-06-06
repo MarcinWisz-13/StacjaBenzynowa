@@ -790,7 +790,142 @@ WHERE td.docType = 1
 ### Procedura: p_addContractor - dodaje kontrachenta z weryfikacją podanych danych
 
 ```sql
+CREATE   PROCEDURE [dbo].[p_addContractor]
+	@ContractorNIP varchar(15),
+	@ContractorName varchar(60),
+	@Address varchar(60),
+	@Address2 varchar(60) = NULL,
+	@PostalCode varchar(10),
+	@ContactNumber varchar(15) = NULL,
+	@Email varchar(40) = NULL,
+	@ContractorType int = NULL
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
 
+    BEGIN TRY
+
+	DECLARE @IsValidNIP bit;
+	DECLARE @IsValidNameAddress bit;
+	DECLARE @IsValidPostalCode bit;
+	DECLARE @IsValidContactNumber bit;
+	DECLARE @IsValidEmail bit;
+
+
+	----------isValidNIP
+	
+	 IF LEN(@ContractorNIP) = 10 AND ISNUMERIC(@ContractorNIP) = 1
+	 BEGIN
+		SET @IsValidNIP = 1;
+	 END
+	 ELSE
+		BEGIN
+			SET @IsValidNIP = 0;
+		    PRINT 'NIP Niepoprawny';
+            THROW 50001, 'NIP Niepoprawny', 1;
+		END
+
+
+	-----------isValidNameAddress
+
+	 IF LEN(@Address) <= 60 AND LEN(@ContractorName) <= 60
+	 BEGIN
+		SET @IsValidNameAddress = 1;
+	 END
+	 ELSE
+		BEGIN
+			SET @IsValidNameAddress = 0;
+		    PRINT 'Nazwa lub adres niepoprawne';
+            THROW 50002, 'Nazwa lub adres niepoprawne', 1;
+		END
+
+	-----------isValidPostalCode
+
+	 IF @PostalCode LIKE '[0-9][0-9]-[0-9][0-9][0-9]' AND LEN(@PostalCode) <= 10
+	 BEGIN
+		SET @IsValidPostalCode = 1;
+	 END
+	 else
+		BEGIN
+			SET @IsValidPostalCode = 0;
+			PRINT 'Kod pocztowy niepoprawny';
+			THROW 50003, 'Kod pocztowy niepoprawny', 1;
+		END
+
+
+	-----------isValidContactNumber
+
+	IF ((LEN(@ContactNumber) BETWEEN 9 AND 15) AND ISNUMERIC(@ContactNumber) = 1) OR @ContactNumber is NULL
+	BEGIN
+		SET @IsValidContactNumber = 1;
+	END
+	else
+		BEGIN
+			SET @IsValidContactNumber = 0;
+			PRINT 'Numer kontaktowy niepoprawny';
+            THROW 50004, 'Numer kontaktowy niepoprawny', 1;
+		END
+
+	-----------isValidEmail
+
+ IF @Email LIKE '%_@__%.__%' AND						--sprawdza pierwszą formę maila - " układ"
+       CHARINDEX(' ', @Email) = 0 AND					--sprawdza czy email nie zawiera spacji
+       CHARINDEX('..', @Email) = 0 AND					--sprawdza czy email nie zawiera podwójnej kropki
+       LEFT(@Email, 1) NOT IN ('@', '.') AND			--sprawdza czy nie zaczyna sie lub konczy @ albo .
+       RIGHT(@Email, 1) NOT IN ('@', '.') AND
+       LEN(@Email) <= 254 AND
+       LEN(@Email) - LEN(REPLACE(@Email, '@', '')) = 1
+	BEGIN
+		SET @IsValidEmail = 1;
+	END
+    ELSE
+		BEGIN
+			SET @IsValidEmail = 0;
+			PRINT 'Email niepoprawny';
+            THROW 50005, 'Email niepoprawny', 1;
+		END
+
+
+	--jeśli wszystko poprawne, insert do tabeli
+	IF @IsValidContactNumber = 1 AND 
+	@IsValidNameAddress = 1 AND 
+	@IsValidEmail = 1 AND 
+	@IsValidNIP = 1 AND 
+	@IsValidPostalCode = 1
+		BEGIN
+			insert into contractors (idContractorNIP, contractorName, address, address2, postalCode, contactNumber, email, contractorType) values
+			(@ContractorNIP, @ContractorName, @Address, @Address2, @PostalCode, @ContactNumber, @Email, @ContractorType);
+		END
+	else
+	BEGIN
+		PRINT 'ERROR NA KONCU';
+		THROW 50010, 'ERROR NA KONCU',1;
+	END
+
+	
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
 ```
 
 <br>
@@ -798,7 +933,47 @@ WHERE td.docType = 1
 ### Procedura: p_addEmptyOrder - dodaj zamówienie - tworzy "koszyk"
 
 ```sql
+CREATE   PROCEDURE [dbo].[p_addEmptyOrder]
+	@ContractorNIP varchar(15)
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
 
+    BEGIN TRY
+	IF EXISTS (SELECT 1 FROM contractors where idContractorNIP = @ContractorNIP)
+	BEGIN
+		insert into orders (contractorNIP) OUTPUT inserted.idOrder values (@ContractorNIP);
+		
+	END
+	ELSE
+		BEGIN
+		PRINT 'Kontrachent nie istnieje, dodaj kontrachenta';
+		THROW 50006, 'Kontrachent nie istnieje, dodaj kontrachenta', 1;
+		END
+	
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
 ```
 
 <br>
@@ -807,7 +982,50 @@ WHERE td.docType = 1
 ### Procedura: p_addFuelToOrder - dodaj paliwo do utworzonego wcześniej zamówienia - "koszyka"
 
 ```sql
+CREATE    PROCEDURE [dbo].[p_addFuelToOrder]
+	@IDOrder int, 
+	@FuelCode varchar(6),
+	@Amount float,
+	@Price float
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
 
+    BEGIN TRY
+	IF @IDOrder != 0 AND @FuelCode != '' AND @Amount != 0 AND @Price != 0
+	BEGIN
+		insert into orderDetails ( idOrder, fuelCode, amountFuel, pricePerLiter) values
+								 (@IDOrder, @FuelCode, @Amount, @Price);
+	END
+	ELSE 
+		BEGIN
+		PRINT 'Niepoprawne dane';
+        THROW 50001, 'Niepoprawne dane', 1;
+		END
+	
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
 ```
 
 <br>
@@ -815,7 +1033,97 @@ WHERE td.docType = 1
 ### Procedura: p_collectOrder - odbierz zamówienie - potwierdzamy dostawe paliw - aktualizuje stany magazynowe
 
 ```sql
+CREATE PROCEDURE [dbo].[p_collectOrder]
+	@IDOrder int
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
 
+    BEGIN TRY
+	DECLARE @tmp_IdOrderDetails int;
+	DECLARE @tmp_AmountFuel float;
+	DECLARE @tmp_FuelCode varchar(6);
+	DECLARE @tmp_OrderDetailsTable TABLE (
+    id int,
+	amountFuel float,
+	fuelCode varchar(6)
+    );
+
+	IF EXISTS (SELECT 1 FROM orders where idOrder = @IDOrder)
+	BEGIN
+
+	update orders					--ustawienie daty dostarczenia, potwierdzamy odbiór zamówienia
+	set deliveryDate = GETDATE()
+	where idOrder = @IDOrder;
+
+
+	--cały proces tworzenia tabeli chwilowej oraz kursora który iteruje po tej tabeli z pozycjami order details wywołując funkcję p_fuelLevelUpdate
+	insert into @tmp_OrderDetailsTable(id, amountFuel, fuelCode)
+	select id, amountFuel, fuelCode
+	from orderDetails
+	where idOrder = @IDOrder;
+
+	DECLARE orders_cursor CURSOR FOR
+	select id, amountFuel, fuelCode
+	from @tmp_OrderDetailsTable
+
+	OPEN orders_cursor;
+
+	FETCH NEXT FROM orders_cursor INTO 
+	@tmp_IdOrderDetails,
+    @tmp_AmountFuel,
+	@tmp_FuelCode;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		EXEC p_fuelLevelUpdate 
+		@FuelCode = @tmp_FuelCode,
+		@AmountOfFuel = @tmp_AmountFuel,
+		@isDelivery = 1;
+
+		FETCH NEXT FROM orders_cursor INTO 
+		@tmp_IdOrderDetails,
+	    @tmp_AmountFuel,
+		@tmp_FuelCode;
+	END
+
+	CLOSE orders_cursor;
+    DEALLOCATE orders_cursor;
+
+	END
+	ELSE
+		BEGIN
+		PRINT 'Zamówienie nie istnieje';
+        THROW 50007, 'Zamówienie nie istnieje', 1;
+		END
+	
+
+
+	
+	
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
 ```
 
 <br>
@@ -824,7 +1132,50 @@ WHERE td.docType = 1
 ### Procedura: p_confirmOrder - potwierdzamy wysłanie zamówienia - czyli zamykamy koszyk ale bez potwierdzenia odbioru
 
 ```sql
+CREATE     PROCEDURE [dbo].[p_confirmOrder]
+	@IDOrder int
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
 
+    BEGIN TRY
+	IF EXISTS (SELECT 1 FROM orders where idOrder = @IDOrder)
+	BEGIN
+		update orders
+		set orderDate = GETDATE()
+		where idOrder = @IDOrder;
+	END
+	ELSE
+		BEGIN
+		PRINT 'Zamówienie nie istnieje';
+		THROW 50007, 'Zamówienie nie istnieje', 1;
+		END
+
+	
+	
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
 ```
 
 <br>
@@ -833,7 +1184,50 @@ WHERE td.docType = 1
 ### Procedura: p_endFueling - koniec tankowania - wyzwalane odłożeniem pistoletu przy dystrybutorze na swoje miejscie
 
 ```sql
+CREATE     PROCEDURE [dbo].[p_confirmOrder]
+	@IDOrder int
+AS
+BEGIN
+    -- Rozpoczęcie transakcji
+    BEGIN TRANSACTION;
 
+    BEGIN TRY
+	IF EXISTS (SELECT 1 FROM orders where idOrder = @IDOrder)
+	BEGIN
+		update orders
+		set orderDate = GETDATE()
+		where idOrder = @IDOrder;
+	END
+	ELSE
+		BEGIN
+		PRINT 'Zamówienie nie istnieje';
+		THROW 50007, 'Zamówienie nie istnieje', 1;
+		END
+
+	
+	
+
+        -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- W przypadku błędu, cofnij transakcję
+        ROLLBACK;
+
+        -- Opcjonalnie, obsłuż błąd
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        -- Wyrzuć błąd ponownie
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH;
+END;
 ```
 
 <br>
@@ -889,6 +1283,108 @@ WHERE td.docType = 1
 
 
 ## Triggery
+
+<br><br>
+
+### Tabela: contractors; Trigger: tgr_Contractors_Changed
+
+Opis: Zapisuje w tabeli contractorsArchive zmiany wykonane na kontraktorach
+
+```sql
+CREATE TRIGGER [dbo].[trg_Contractors_Changed]
+ON [dbo].[contractors]
+AFTER UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Obsługa operacji UPDATE
+    IF EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted)
+    BEGIN
+        IF UPDATE(contractorName) OR
+           UPDATE(address) OR
+           UPDATE(address2) OR
+           UPDATE(postalCode) OR
+           UPDATE(contactNumber) OR
+           UPDATE(email) OR
+           UPDATE(contractorType)
+        BEGIN
+            INSERT INTO dbo.contractorsArchive (
+                idContractorNIP,
+                operationType,
+                NEW_contractorName,
+                NEW_address,
+                NEW_address2,
+                NEW_postalCode,
+                NEW_contactNumber,
+                NEW_email,
+                NEW_contractorType,
+                OLD_contractorName,
+                OLD_address,
+                OLD_address2,
+                OLD_postalCode,
+                OLD_contactNumber,
+                OLD_email,
+                OLD_contractorType
+            )
+            SELECT 
+                i.idContractorNIP,
+                'UPDATE',
+                CASE WHEN i.contractorName <> d.contractorName THEN i.contractorName ELSE NULL END,
+                CASE WHEN i.address <> d.address THEN i.address ELSE NULL END,
+                CASE WHEN i.address2 <> d.address2 THEN i.address2 ELSE NULL END,
+                CASE WHEN i.postalCode <> d.postalCode THEN i.postalCode ELSE NULL END,
+                CASE WHEN i.contactNumber <> d.contactNumber THEN i.contactNumber ELSE NULL END,
+                CASE WHEN i.email <> d.email THEN i.email ELSE NULL END,
+                CASE WHEN i.contractorType <> d.contractorType THEN i.contractorType ELSE NULL END,
+                d.contractorName,
+                d.address,
+                d.address2,
+                d.postalCode,
+                d.contactNumber,
+                d.email,
+                d.contractorType
+            FROM inserted i
+            INNER JOIN deleted d ON i.idContractorNIP = d.idContractorNIP
+            WHERE i.contractorName <> d.contractorName OR
+                  i.address <> d.address OR
+                  i.address2 <> d.address2 OR
+                  i.postalCode <> d.postalCode OR
+                  i.contactNumber <> d.contactNumber OR
+                  i.email <> d.email OR
+                  i.contractorType <> d.contractorType;
+        END
+    END
+
+    -- Obsługa operacji DELETE
+    IF EXISTS (SELECT * FROM deleted) AND NOT EXISTS (SELECT * FROM inserted)
+    BEGIN
+        INSERT INTO dbo.contractorsArchive (
+            idContractorNIP,
+            operationType,
+            OLD_contractorName,
+            OLD_address,
+            OLD_address2,
+            OLD_postalCode,
+            OLD_contactNumber,
+            OLD_email,
+            OLD_contractorType
+        )
+        SELECT 
+            d.idContractorNIP,
+            'DELETE',
+            d.contractorName,
+            d.address,
+            d.address2,
+            d.postalCode,
+            d.contactNumber,
+            d.email,
+            d.contractorType
+        FROM deleted d;
+    END
+END;
+
+```
 
 
   
