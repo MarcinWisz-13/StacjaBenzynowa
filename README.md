@@ -140,6 +140,37 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
+### Nazwa Tabeli: contractorsArchive
+
+<br>
+
+- Opis: Tabela historyczna odpowiedzialna za przechowywanie zmian na kontrachentach
+
+  <br>
+
+| Nazwa atrybutu | Typ | Długość | Opis/Uwagi |
+| -------------- | --- | ------- | ---------- |
+| idArchive | int | | id zmiany |
+| idContractorNIP | varchar | 15 | PK - id/NIP firmy  |
+| operationType | varchar | 6 | Typ operacji |
+| operationDate | datetime |  | data wykonania operacji |
+| NEW_contractorName | varchar | 60 | Nowa nazwa firmy |
+| NEW_address | varchar | 60 | Nowy adres firmy |
+| NEW_address2 | varchar | 60 | Nowy dalszy adres firmy |
+| NEW_postalCode | varchar | 10 | Nowy kod pocztowy |
+| NEW_contactNumber | varchar | 15 | Nowy numer telefonu |
+| NEW_email |varchar | 40 | Nowy email |
+| NEW_contractorType | int |  | Nowy czy dostawca czy odbiorca |
+| OLD_contractorName | varchar | 60 | Starsza nazwa firmy |
+| OLD_address | varchar | 60 | Starszy adres firmy |
+| OLD_address2 | varchar | 60 | Starszy dalszy adres firmy |
+| OLD_postalCode | varchar | 10 | Starszy kod pocztowy |
+| OLD_contactNumber | varchar | 15 | Starszy numer telefonu |
+| OLD_email |varchar | 40 | Starszy email  |
+| OLD_contractorType | int |  | Starsza czy dostawca czy odbiorca |
+
+<br>
+
 ### Nazwa tabeli: distStations
 
 <br>
@@ -344,7 +375,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
-tabela "contractors" <br>
+### tabela "contractors" <br>
 ```sql
 CREATE TABLE [dbo].[contractors](
 	[idContractorNIP] [varchar](15) NOT NULL,
@@ -364,7 +395,41 @@ CREATE TABLE [dbo].[contractors](
 
 <br>
 
-tabela "distStation"
+### tabela "contractorsArchive"
+```sql
+CREATE TABLE [dbo].[contractorsArchive](
+	[idArchive] [int] IDENTITY(1,1) NOT NULL,
+	[idContractorNIP] [varchar](15) NOT NULL,
+	[operationType] [varchar](6) NOT NULL,
+	[operationDate] [datetime] NOT NULL,
+	[NEW_contractorName] [varchar](60) NULL,
+	[NEW_address] [varchar](60) NULL,
+	[NEW_address2] [varchar](60) NULL,
+	[NEW_postalCode] [varchar](10) NULL,
+	[NEW_contactNumber] [varchar](15) NULL,
+	[NEW_email] [varchar](40) NULL,
+	[NEW_contractorType] [int] NULL,
+	[OLD_contractorName] [varchar](60) NOT NULL,
+	[OLD_address] [varchar](60) NOT NULL,
+	[OLD_address2] [varchar](60) NULL,
+	[OLD_postalCode] [varchar](10) NOT NULL,
+	[OLD_contactNumber] [varchar](15) NULL,
+	[OLD_email] [varchar](40) NULL,
+	[OLD_contractorType] [int] NULL,
+ CONSTRAINT [PK_contractorsArchive] PRIMARY KEY CLUSTERED 
+(
+	[idArchive] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[contractorsArchive] ADD  DEFAULT (getdate()) FOR [operationDate]
+GO
+```
+
+<br>
+
+### tabela "distStation"
 ```sql
 CREATE TABLE [dbo].[distStation](
 	[idStationNumber] [int] NOT NULL,
@@ -381,7 +446,7 @@ CREATE TABLE [dbo].[distStation](
 
 <br>
 
-tabela "docNumeration"
+### tabela "docNumeration"
 ```sql
 CREATE TABLE [dbo].[docNumeration](
 	[id] [int] NOT NULL,
@@ -396,7 +461,7 @@ CREATE TABLE [dbo].[docNumeration](
 
 <br>
 
-tabela "employees"
+### tabela "employees"
 ```sql
 CREATE TABLE [dbo].[employees](
 	[idEmployee] [int] NOT NULL,
@@ -412,7 +477,7 @@ CREATE TABLE [dbo].[employees](
 
 <br>
 
-tabela "fuelingHistory"
+### tabela "fuelingHistory"
 ```sql
 CREATE TABLE [dbo].[fuelingHistory](
 	[idFueling] [int] IDENTITY(1,1) NOT NULL,
@@ -429,7 +494,7 @@ CREATE TABLE [dbo].[fuelingHistory](
 
 <br>
 
-tabela "fuelPriceHistory"
+### tabela "fuelPriceHistory"
 ```sql
 CREATE TABLE [dbo].[fuelPriceHistory](
 	[id] [int] IDENTITY(1,1) NOT NULL,
@@ -445,7 +510,7 @@ CREATE TABLE [dbo].[fuelPriceHistory](
 
 <br>
 
-tabela "fuelStorage"
+### tabela "fuelStorage"
 ```sql
 CREATE TABLE [dbo].[fuelStorage](
 	[fuelCode] [varchar](6) NOT NULL,
@@ -462,7 +527,7 @@ CREATE TABLE [dbo].[fuelStorage](
 
 <br>
 
-tabela "losesHistory"
+### tabela "losesHistory"
 ```sql
 CREATE TABLE [dbo].[losesHistory](
 	[idLose] [int] NOT NULL,
@@ -477,7 +542,7 @@ CREATE TABLE [dbo].[losesHistory](
 
 <br>
 
-tabela "orderDetails"
+### tabela "orderDetails"
 ```sql
 CREATE TABLE [dbo].[orderDetails](
 	[id] [int] NOT NULL,
@@ -494,7 +559,7 @@ CREATE TABLE [dbo].[orderDetails](
 
 <br>
 
-tabela "orders"
+### tabela "orders"
 ```sql
 CREATE TABLE [dbo].[orders](
 	[idOrder] [int] NOT NULL,
@@ -511,7 +576,7 @@ CREATE TABLE [dbo].[orders](
 
 <br>
 
-tabela "pumpGuns"
+### tabela "pumpGuns"
 ```sql
 CREATE TABLE [dbo].[pumpGuns](
 	[idPumpGun] [int] NOT NULL,
@@ -526,7 +591,7 @@ CREATE TABLE [dbo].[pumpGuns](
 
 <br>
 
-tabela "transactionDocuments"
+### tabela "transactionDocuments"
 ```sql
 CREATE TABLE [dbo].[transactionDocuments](
 	[id] [int] NOT NULL,
@@ -566,7 +631,7 @@ WHERE        (date =
 ```
 <br>
 
-Widok: v_contractorsOrders - widok pokazuję szczegółowe dane zamówień
+### Widok: v_contractorsOrders - widok pokazuję szczegółowe dane zamówień
 
  ```sql
 CREATE VIEW [dbo].[v_contractorsOrders] AS
@@ -590,7 +655,7 @@ JOIN
 ```
 <br>
 
-Widok: v_employeePerformance - pokazuję wydajność sprzedażową danego pracownika
+### Widok: v_employeePerformance - pokazuję wydajność sprzedażową danego pracownika
 
  ```sql
 CREATE VIEW [dbo].[v_employeePerformance] AS
@@ -609,7 +674,7 @@ GROUP BY e.idEmployee, e.firstName, e.surname, e.positionTitle;
 ```
 <br>
 
-Widok: v_fuelingDetails - pokazuje aktalną sprzedaż każdego paliwa (które najszybciej się sprzedaję)
+### Widok: v_fuelingDetails - pokazuje aktalną sprzedaż każdego paliwa (które najszybciej się sprzedaję)
 
 ```sql
 CREATE VIEW [dbo].[v_fuelingDetails]
@@ -628,7 +693,7 @@ INNER JOIN dbo.pumpGuns pg ON fh.idPumpGun = pg.idPumpGun
 
 <br>
 
-Widok: v_FuelTypeSummary - pokazuje aktualną sprzedaż w podziale na dane paliwo
+### Widok: v_FuelTypeSummary - pokazuje aktualną sprzedaż w podziale na dane paliwo
 
 ```sql
 CREATE VIEW [dbo].[v_FuelTypeSummary] AS
@@ -644,7 +709,7 @@ GROUP BY pg.fuelCode, fs.fuelName;
 
 <br>
 
-Widok: v_invoiceSummary - widok pokazujący wszystkie faktury wraz z wartością
+### Widok: v_invoiceSummary - widok pokazujący wszystkie faktury wraz z wartością
 
 ```sql
 CREATE   VIEW [dbo].[v_invoiceSummary]
@@ -670,7 +735,7 @@ INNER JOIN contractors as c ON td.idContractorNIP= c.idContractorNIP
 
 <br>
 
-Widok: v_orderSummaryView - pokazuje podsumowanie zamówień
+### Widok: v_orderSummaryView - pokazuje podsumowanie zamówień
 
 ```sql
 CREATE VIEW [dbo].[v_orderSummaryView]
@@ -694,7 +759,7 @@ GROUP BY
 
 <br>
 
-Widok: v_receiptSummary - pokazuje zestawienie wszystkich paragonów
+### Widok: v_receiptSummary - pokazuje zestawienie wszystkich paragonów
 
 ```sql
 CREATE VIEW [dbo].[v_receiptSummary]
@@ -722,7 +787,7 @@ WHERE td.docType = 1
 
 <br>
 
-Procedura: p_addContractor - dodaje kontrachenta z weryfikacją podanych danych
+### Procedura: p_addContractor - dodaje kontrachenta z weryfikacją podanych danych
 
 ```sql
 
@@ -730,24 +795,7 @@ Procedura: p_addContractor - dodaje kontrachenta z weryfikacją podanych danych
 
 <br>
 
-Procedura: p_addEmptyOrder - dodaj zamówienie - tworzy "koszyk"
-
-```sql
-
-```
-
-<br>
-
-
-Procedura: p_addFuelToOrder - dodaj paliwo do utworzonego wcześniej zamówienia - "koszyka"
-
-```sql
-
-```
-
-<br>
-
-Procedura: p_collectOrder - odbierz zamówienie - potwierdzamy dostawe paliw - aktualizuje stany magazynowe
+### Procedura: p_addEmptyOrder - dodaj zamówienie - tworzy "koszyk"
 
 ```sql
 
@@ -756,7 +804,15 @@ Procedura: p_collectOrder - odbierz zamówienie - potwierdzamy dostawe paliw - a
 <br>
 
 
-Procedura: p_confirmOrder - potwierdzamy wysłanie zamówienia - czyli zamykamy koszyk ale bez potwierdzenia odbioru
+### Procedura: p_addFuelToOrder - dodaj paliwo do utworzonego wcześniej zamówienia - "koszyka"
+
+```sql
+
+```
+
+<br>
+
+### Procedura: p_collectOrder - odbierz zamówienie - potwierdzamy dostawe paliw - aktualizuje stany magazynowe
 
 ```sql
 
@@ -765,7 +821,7 @@ Procedura: p_confirmOrder - potwierdzamy wysłanie zamówienia - czyli zamykamy 
 <br>
 
 
-Procedura: p_endFueling - koniec tankowania - wyzwalane odłożeniem pistoletu przy dystrybutorze na swoje miejscie
+### Procedura: p_confirmOrder - potwierdzamy wysłanie zamówienia - czyli zamykamy koszyk ale bez potwierdzenia odbioru
 
 ```sql
 
@@ -774,7 +830,7 @@ Procedura: p_endFueling - koniec tankowania - wyzwalane odłożeniem pistoletu p
 <br>
 
 
-Procedura: p_fuelLevelUpdate - procedura obsługujaca ruch magazynowy w magazynie paliw
+### Procedura: p_endFueling - koniec tankowania - wyzwalane odłożeniem pistoletu przy dystrybutorze na swoje miejscie
 
 ```sql
 
@@ -783,7 +839,7 @@ Procedura: p_fuelLevelUpdate - procedura obsługujaca ruch magazynowy w magazyni
 <br>
 
 
-Procedura: p_fuelPriceUpdate - aktualizacja ceny dla danego paliwa
+### Procedura: p_fuelLevelUpdate - procedura obsługujaca ruch magazynowy w magazynie paliw
 
 ```sql
 
@@ -792,7 +848,7 @@ Procedura: p_fuelPriceUpdate - aktualizacja ceny dla danego paliwa
 <br>
 
 
-Procedura: p_genLose - generowanie dokumentu strat - powiązane z konkretnym tankowaniem z fuelingHistory
+### Procedura: p_fuelPriceUpdate - aktualizacja ceny dla danego paliwa
 
 ```sql
 
@@ -801,7 +857,7 @@ Procedura: p_genLose - generowanie dokumentu strat - powiązane z konkretnym tan
 <br>
 
 
-Procedura: p_genTransactionDoc - generowanie dokumentu sprzedażowego
+### Procedura: p_genLose - generowanie dokumentu strat - powiązane z konkretnym tankowaniem z fuelingHistory
 
 ```sql
 
@@ -810,7 +866,16 @@ Procedura: p_genTransactionDoc - generowanie dokumentu sprzedażowego
 <br>
 
 
-Procedura: p_startFueling - rozpoczęcie tankowania - aktywowane podniesiem pistoletu przy dystrybutorze
+### Procedura: p_genTransactionDoc - generowanie dokumentu sprzedażowego
+
+```sql
+
+```
+
+<br>
+
+
+### Procedura: p_startFueling - rozpoczęcie tankowania - aktywowane podniesiem pistoletu przy dystrybutorze
 
 ```sql
 
