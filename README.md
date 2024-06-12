@@ -793,7 +793,7 @@ CONVERT(varchar,td.date,104) as docDate
 FROM transactionDocuments as td
 INNER JOIN fuelingHistory as fh ON td.idFueling = fh.idFueling
 INNER JOIN pumpGuns as pg ON fh.idPumpGun = pg.idPumpGun
-INNER JOIN docNumeration as dn ON td.idDocNumeration = dn.id
+INNER JOIN docNumeration as dn ON td.docType = dn.id
 INNER JOIN contractors as c ON td.idContractorNIP= c.idContractorNIP
 INNER JOIN p ON fh.idFueling = p.idFueling
 WHERE td.docType = 2
@@ -840,16 +840,14 @@ dn.prefix + '/' + CAST(td.docTitleNumber as varchar)+  '/' + RIGHT(CONVERT(varch
 		 )  as docTitle,
 pg.fuelCode ,
 fh.amountOfFuel , 
---FORMAT(ROUND(fh.pricePerLiter * (1 - (CAST(td.taxPTU as FLOAT) / 100)) ,2) , 'N2') as nettoPerLiter,
 FORMAT(ROUND(fh.pricePerLiter , 2), 'N2') as bruttoPerLiter,
---FORMAT(ROUND(p.totalBrutto * (1 - (CAST(td.taxPTU as FLOAT) / 100)) , 2), 'N2')  as Netto, 
 FORMAT(ROUND((p.totalBrutto) - (p.totalBrutto * (1 - (CAST(td.taxPTU as FLOAT) / 100))),2),'N2') AS TotalTax,
 FORMAT(ROUND(p.totalBrutto , 2 ), 'N2') as Brutto,
 CONVERT(varchar,td.date,104) as docDate
 FROM transactionDocuments as td
 INNER JOIN fuelingHistory as fh ON td.idFueling = fh.idFueling
 INNER JOIN pumpGuns as pg ON fh.idPumpGun = pg.idPumpGun
-INNER JOIN docNumeration as dn ON td.idDocNumeration = dn.id
+INNER JOIN docNumeration as dn ON td.docType = dn.id
 INNER JOIN p ON fh.idFueling = p.idFueling
 WHERE td.docType = 1
 GO
