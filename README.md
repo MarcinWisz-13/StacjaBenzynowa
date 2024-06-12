@@ -363,10 +363,6 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | idPumpGun | integer | | PK - id pistoletu |
 | idStationNumber | integer | | Numer dystrybutora |
 | fuelCode | varchar | 6 | dostępne paliwo dla danego pistoletu |
-| inUse | bit | | czy pistolet w użyciu - podniesiony
-| transactionFinished | bit | | czy transakcja dla danego tankowania zakończona 1 - tak |
-| amountOfFuel | float | | Ilość zatankowanego paliwa |
-| idActualPrice | int | | id aktualnej ceny paliwa pobranej z tabeli fuelPriceHistory |
 
 <br>
 
@@ -386,6 +382,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | date | datetime | | Data wystawienia dokumentu |
 | idContractorNIP | varchar | 15 | NIP kontrachenta |
 | taxPTU | integer | | Stawka VAT wyrażona w % |
+| paymentMethod | int | | metoda płatności |
 | idFueling | integer | | id tankowania | 
 | idDocNumeration | integer | | id schematu numeracji dokumentu |
 | idEmployee | integer | | id pracownika wystawiającego dokument |
@@ -572,14 +569,6 @@ GO
 
 ALTER TABLE [dbo].[fuelStorageArchive] ADD  DEFAULT (getdate()) FOR [operationDate]
 GO
-
-ALTER TABLE [dbo].[fuelStorageArchive]  WITH CHECK ADD  CONSTRAINT [FK_fuelStorageArchive_fuelStorage] FOREIGN KEY([fuelCode])
-REFERENCES [dbo].[fuelStorage] ([fuelCode])
-GO
-
-ALTER TABLE [dbo].[fuelStorageArchive] CHECK CONSTRAINT [FK_fuelStorageArchive_fuelStorage]
-GO
-
 ```
 <br>
 
@@ -730,7 +719,7 @@ GROUP BY e.idEmployee, e.firstName, e.surname, e.positionTitle;
 ```
 <br>
 
-### Widok: v_fuelingDetails - pokazuje aktalną sprzedaż każdego paliwa (które najszybciej się sprzedaję)
+### Widok: v_fuelingDetails - pokazuje historię tankowań
 
 ```sql
 CREATE VIEW [dbo].[v_fuelingDetails]
@@ -760,7 +749,8 @@ SELECT
 FROM fuelingHistory fh
 JOIN pumpGuns pg ON fh.idPumpGun = pg.idPumpGun
 JOIN fuelStorage fs ON pg.fuelCode = fs.fuelCode
-GROUP BY pg.fuelCode, fs.fuelName;
+GROUP BY pg.fuelCode, fs.fuelName
+ORDER BY totalAmountOfFuel DESC
 ```
 
 <br>
