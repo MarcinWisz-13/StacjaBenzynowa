@@ -295,8 +295,6 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | OLD_tankNumber | integer | | stary numer zbiornika w którym znajduje się paliwo |
 | NEW_fuelMaxLevel | float | | nowa maksymalna pojemność zbiornika |
 | OLD_fuelMaxLevel | float | | stara maksymalna pojemność zbiornika |
-
-
 | fuelMaxLevel | float | | maksymalna pojemność zbiornika |
 
 <br>
