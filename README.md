@@ -275,6 +275,32 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 <br>
 
+### Nazwa tabeli: fuelStorageArchive
+
+<br>
+
+- Opis: tabela odpowiedzialna za zbieranie danych o zmianach w magazynie paliw
+
+<br>
+
+| Nazwa atrybutu | Typ |  Długość | Opis/Uwagi |
+| -------------- | ---- | ---------- | - |
+| idArchive | int | | PK - id zmiany |
+| fuelCode | varchar | 6 | PK - kod paliwa |
+| operationType | varchar | 6 | Typ operacji |
+| operationDate | datetime |  | data wykonania operacji |
+| NEW_fuelCurrLevel | float | | aktualny poziom paliwa w zbiorniku |
+| OLD_fuelCurrLevel | float | | stary poziom paliwa w zbiorniku |
+| NEW_tankNumber | integer | | numer zbiornika w którym znajduje się paliwo |
+| OLD_tankNumber | integer | | stary numer zbiornika w którym znajduje się paliwo |
+| NEW_fuelMaxLevel | float | | nowa maksymalna pojemność zbiornika |
+| OLD_fuelMaxLevel | float | | stara maksymalna pojemność zbiornika |
+
+
+| fuelMaxLevel | float | | maksymalna pojemność zbiornika |
+
+<br>
+
 ### Nazwa tabeli: losesHistory
 
 <br>
@@ -525,6 +551,39 @@ CREATE TABLE [dbo].[fuelStorage](
 ) ON [PRIMARY]
 ```
 
+<br>
+
+### tabela "fuelStorageArchive"
+```sql
+CREATE TABLE [dbo].[fuelStorageArchive](
+	[idArchive] [int] IDENTITY(1,1) NOT NULL,
+	[fuelCode] [varchar](6) NOT NULL,
+	[operationDate] [datetime] NOT NULL,
+	[operationType] [varchar](20) NOT NULL,
+	[NEW_fuelCurrLevel] [float] NULL,
+	[OLD_fuelCurrLevel] [float] NULL,
+	[NEW_tankNumber] [int] NULL,
+	[OLD_tankNumber] [int] NULL,
+	[NEW_fuelMaxLevel] [float] NULL,
+	[OLD_fuelMaxLevel] [float] NULL,
+ CONSTRAINT [PK_fuelStorageArchive] PRIMARY KEY CLUSTERED 
+(
+	[idArchive] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[fuelStorageArchive] ADD  DEFAULT (getdate()) FOR [operationDate]
+GO
+
+ALTER TABLE [dbo].[fuelStorageArchive]  WITH CHECK ADD  CONSTRAINT [FK_fuelStorageArchive_fuelStorage] FOREIGN KEY([fuelCode])
+REFERENCES [dbo].[fuelStorage] ([fuelCode])
+GO
+
+ALTER TABLE [dbo].[fuelStorageArchive] CHECK CONSTRAINT [FK_fuelStorageArchive_fuelStorage]
+GO
+
+```
 <br>
 
 ### tabela "losesHistory"
@@ -1734,6 +1793,74 @@ END;
 
 ```
 
+<br>
+
+### Tabela: fuelStorage; Trigger: tgr_fuelStorage_Change
+
+Opis: Zapisuje w tabeli fuelStorageArchive zmiany wykonane w magazynie paliw
+
+```sql
+CREATE TRIGGER [dbo].[trg_FuelStorage_Change]
+ON [dbo].[fuelStorage]
+AFTER UPDATE
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF UPDATE(fuelCurrLevel)
+	BEGIN
+
+	INSERT INTO fuelStorageArchive(
+		fuelCode,
+		operationType,
+		NEW_fuelCurrLevel,
+		OLD_fuelCurrLevel
+	)
+	SELECT 
+		i.fuelCode,
+		CASE WHEN i.fuelCurrLevel < d.fuelCurrLevel THEN 'REFUELING' ELSE 'SUPPLY' END,
+		i.fuelCurrLevel,
+		d.fuelCurrLevel
+	   FROM inserted i
+            INNER JOIN deleted d ON i.fuelCode= d.fuelCode
+	END
+
+	IF UPDATE(fuelMaxLevel)
+	BEGIN
+	
+	INSERT INTO fuelStorageArchive(
+		fuelCode,
+		operationType,
+		NEW_fuelMaxLevel,
+		OLD_fuelMaxLevel
+	)
+	SELECT 
+		i.fuelCode,
+		'CHANGE_MAX_LEVEL',
+		i.fuelMaxLevel,
+		d.fuelMaxLevel
+	   FROM inserted i
+            INNER JOIN deleted d ON i.fuelCode= d.fuelCode
+	END
+
+		IF UPDATE(tankNumber)
+	BEGIN
+	
+	INSERT INTO fuelStorageArchive(
+		fuelCode,
+		operationType,
+		NEW_tankNumber,
+		OLD_tankNumber
+	)
+	SELECT 
+		i.fuelCode,
+		'CHANGE_TANK',
+		i.tankNumber,
+		d.tankNumber
+	   FROM inserted i
+            INNER JOIN deleted d ON i.fuelCode= d.fuelCode
+	END
+END;
+```
 
   
 
