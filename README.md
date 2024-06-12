@@ -109,7 +109,9 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 
 ## Schemat bazy danych
 
-![image](https://github.com/MarcinWisz-13/StacjaBenzynowa/blob/main/schemat_bd.png)
+
+
+![schemat_bd](https://github.com/MarcinWisz-13/StacjaBenzynowa/assets/131010262/77c7aff0-c2d9-4959-be97-bbfdc9153119)
 
 
 <br>
