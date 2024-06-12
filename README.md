@@ -287,7 +287,7 @@ System obsługi stacji paliw, obejmujący zarządzanie magazynem paliw oraz syst
 | -------------- | ---- | ---------- | - |
 | idArchive | int | | PK - id zmiany |
 | fuelCode | varchar | 6 | PK - kod paliwa |
-| operationType | varchar | 6 | Typ operacji |
+| operationType | varchar | 20 | Typ operacji |
 | operationDate | datetime |  | data wykonania operacji |
 | NEW_fuelCurrLevel | float | | aktualny poziom paliwa w zbiorniku |
 | OLD_fuelCurrLevel | float | | stary poziom paliwa w zbiorniku |
