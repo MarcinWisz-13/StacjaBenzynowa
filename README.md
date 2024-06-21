@@ -1244,28 +1244,74 @@ END;
 ### Procedura: p_endFueling - koniec tankowania - wyzwalane odłożeniem pistoletu przy dystrybutorze na swoje miejscie
 
 ```sql
-CREATE     PROCEDURE [dbo].[p_confirmOrder]
-	@IDOrder int
+CREATE   PROCEDURE [dbo].[p_endFueling]
+    @ActiveGun int,
+	@AmountOfFuel float
 AS
 BEGIN
+	
     -- Rozpoczęcie transakcji
     BEGIN TRANSACTION;
 
     BEGIN TRY
-	IF EXISTS (SELECT 1 FROM orders where idOrder = @IDOrder)
-	BEGIN
-		update orders
-		set orderDate = GETDATE()
-		where idOrder = @IDOrder;
-	END
-	ELSE
-		BEGIN
-		PRINT 'Zamówienie nie istnieje';
-		THROW 50007, 'Zamówienie nie istnieje', 1;
-		END
+       DECLARE @FuelCode varchar(6);
+	   DECLARE @IDActualPrice int;
+	   DECLARE @ActualPrice float;
 
-	
-	
+	   IF(select d.activeGun from distStation as d INNER JOIN pumpGuns as p on d.idStationNumber = p.idStationNumber  where p.idPumpGun = @ActiveGun) <> @ActiveGun
+	   BEGIN
+			PRINT 'Wybierz poprawny pistolet';
+			THROW 50017, 'Wybierz poprawny pistolet', 1;
+		END
+		ELSE
+		BEGIN
+	   IF @ActiveGun != 0 AND @AmountOfFuel != 0
+	   BEGIN
+
+	   --pobranie kodu paliwa
+	   select @FuelCode = fuelCode 
+	   from pumpGuns 
+	   where idPumpGun = @ActiveGun;
+	  
+	   --pobieranie aktualnego id ceny dla danego paliwa
+	   select @IDActualPrice = id 
+	   from v_actualPrice
+	   where fuelCode = @FuelCode
+
+	   --pobieranie aktualnej ceny na podstawie id
+	   select @ActualPrice = price
+	   from fuelPriceHistory
+	   where id = @IDActualPrice;
+
+	   --aktualizacja stanu licznika
+	   update distStation
+	   set amountOfFuel = @AmountOfFuel
+	   where activeGun = @ActiveGun;
+
+
+
+	   --aktualizacja poziomu paliw o wartość pobraną z dystrybutora
+	   EXEC p_fuelLevelUpdate
+	   @FuelCode = @FuelCode, 
+	   @AmountOfFuel = @AmountOfFuel, 
+	   @isDelivery = 0;
+
+	   --ustawienie tranzakcji nieopłaconej, blokada dystrybutora
+	   update distStation
+	   set transactionFinished = 0
+	   where activeGun = @ActiveGun;
+
+	   --fueling history insert
+	   insert into fuelingHistory (idPumpGun, pricePerLiter, amountOfFuel, date) values
+	   (@ActiveGun, @ActualPrice, @AmountOfFuel, GETDATE());
+		
+		END
+		ELSE 
+			BEGIN
+			PRINT 'Błąd parametrów';
+			THROW 50008, 'Błąd parametrów', 1;
+			END
+	END
 
         -- Jeśli wszystkie operacje zakończą się sukcesem, zatwierdź transakcję
         COMMIT;
@@ -1288,6 +1334,7 @@ BEGIN
         RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
     END CATCH;
 END;
+
 ```
 
 <br>
@@ -1439,7 +1486,7 @@ END;
 
 ```sql
 CREATE   PROCEDURE [dbo].[p_genLose]
-    @IDFueling int,
+   @Distributor int,
 	@CarID varchar (20) = NULL
 AS
 BEGIN
@@ -1448,30 +1495,21 @@ BEGIN
 
     BEGIN TRY
 
-	DECLARE @StationNumber int;
 
-	--select @PumpGun = idPumpGun							--pobranie numeru pistoletu z idFueling
-	--from fuelingHistory
-	--where idFueling = @IDFueling;
+	DECLARE @IDFueling int;	
 
-	--select @StationNumber = pg.idStationNumber				--pobranie do zmiennej station number na podstawie numeru pistoletu
-    --from pumpGuns pg
-	--join distStation ds ON ds.idStationNumber = pg.idStationNumber 
-   	--where pg.idPumpGun = @PumpGun
-
-	select @StationNumber = pg.idStationNumber				--pobranie do zmiennej station number na podstawie numeru tankowania
-    from pumpGuns pg
-	join fuelingHistory fh ON fh.idPumpGun = pg.idPumpGun
-	join distStation ds ON ds.idStationNumber = pg.idStationNumber 
-   	where fh.idFueling = @IDFueling
-
+	select @IDFueling = idFueling							--wyciąganie idFueling po numerze dystrybutora
+	from distStation ds
+	join pumpGuns pg ON ds.idStationNumber = pg.idStationNumber
+	join fuelingHistory fh ON pg.idPumpGun = fh.idPumpGun
+	where ds.idStationNumber = @Distributor AND activeGun != 0
 
 	insert into losesHistory (idFueling, carID) values
 	(@IDFueling, @CarID);
 
 	update distStation
 	set transactionFinished = 1, activeGun = 0
-	where idStationNumber = @StationNumber;
+	where idStationNumber = @Distributor;
 
 
 
@@ -1612,7 +1650,8 @@ BEGIN
 
     BEGIN TRY
 
-		IF ((select transactionFinished from distStation where activeGun = @ActiveGun) = 0) 
+		IF ((select transactionFinished from distStation where activeGun = @ActiveGun) = 0 OR 
+		(select d.activeGun from distStation as d INNER JOIN pumpGuns as p on d.idStationNumber = p.idStationNumber  where p.idPumpGun = @ActiveGun) <> 0 ) 
 		BEGIN
 			PRINT 'Dystrybutor zajęty';
 			THROW 50011, 'Dystrybutor zajęty', 1;
@@ -1866,3 +1905,90 @@ fuelStorage - fuelCurrLevel > 0
 
 orderDetails - amountOfFuel > 0
 oderdDetails - pricePerLiter >= 0
+
+## Przykłady użycia
+
+### Proces tankowania
+
+```sql
+
+--- Wyświetlenie wszystkich tabel uczestniczących podczas procesu tankowania:
+select * from distStation;
+select * from pumpGuns;
+select * from fuelingHistory;
+select * from fuelStorage;
+select * from transactionDocuments;
+select * from losesHistory;
+
+--rozpoczecie procesu tankowania, podniesienie pistoletu wyzwala procedure p_startFueling 
+--podając jako parametr nr danego pistoletu
+
+EXEC p_startFueling @ActiveGun = 6;
+
+---Po wykonaniu procedury nie jest możliwe użycie pistoletu na tym samym dystrybutorze
+---Pistolet nr 6 użyty w teście należy do Dystrybutora nr 2
+--- Możemy podejżeć inne pistolety dla tego dystrybutora i spróbowac ich użyć
+
+select * from pumpGuns WHERE idStationNumber = 2;
+EXEC p_startFueling @ActiveGun = 8;
+
+--- Otrzymamy komunikat "Dystrybutor zajęty"
+--- Możemy uzyć zaś pistoletu z innego dowolnego wolnego dystrybutora
+
+EXEC p_startFueling @ActiveGun = 2;
+
+---Blokujemy jedynie możliwość uzycia zajętego już dystrybutora
+
+---po zakończonym tankowaniu odkładamy pistolet, mikrostyk krańcowy na dystrybutorze 
+---wyzwala funkcję p_endFueling przekazując nr danego pistoletu oraz ilość zalanego paliwa
+
+EXEC p_endFueling @ActiveGun = 6, @AmountOfFuel = 45.13;
+
+--- W tym momencie wciąż nie możemy użyć innego pistoletu z dystrybutora, do kórego przypisany jest pistolet nr.6
+select * from pumpGuns WHERE idStationNumber = 2;
+EXEC p_startFueling @ActiveGun = 5;
+
+--teraz mamy 2 możliwości:
+	klient zapłacił | klient nie zapłacił 
+
+------klient płaci, podchodzi do kasy i podaje numer dystrybutora oraz mówi jak płaci i czy chce paragon czy fakture
+---Wywołujemy procedurę odpowiedzialną za generowanie dokumenty fiskalnego
+---Tworzenie Faktury:
+
+EXEC p_genTransactionDocument @DocType = 2, 
+							  @IDContractorNIP = '1234567890', 
+							  @TaxPTU = 23, 
+							  @PaymentMethod = 2, 
+							  @Distributor = 2, 
+							  @IDDocNumeration = 1, 
+							  @IDEmployee = 6;
+
+---Tworzenie paragonu:
+EXEC p_genTransactionDocument @DocType = 1, 
+							  @IDContractorNIP = NULL, 
+							  @TaxPTU = 23, 
+							  @PaymentMethod = 2, 
+							  @Distributor = 2, 
+							  @IDDocNumeration = 1, 
+							  @IDEmployee = 6;
+
+---Dokument fiskalny został stworzony tym samym nastąpiło odblokowanie dystrybutora
+
+--- Sytuacja, w której klient postanowił uciec i nie zapłacić:
+----Dystrybutor będzie zablokowany do momentu wywołania p_genLose
+------podając numer Dystrybutora, na którym doszło do kradzieży i opcjonalnie numer tablic rejestracyjnych jeśli je poznaliśmy
+
+EXEC p_genLose @Distributor = 2 , @CarID = 'KR ZX5E4';
+
+--Dystrybutor został odblokowany, a do bazy dodany został wpis
+--- mówiący o kradzieży 
+
+```
+
+### Proces tworzenia zamówienia
+
+```sql
+
+
+
+```
