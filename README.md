@@ -1053,7 +1053,7 @@ BEGIN
     BEGIN TRANSACTION;
 
     BEGIN TRY
-	IF @IDOrder != 0 AND @FuelCode != '' AND @Amount != 0 AND @Price != 0
+	IF @IDOrder != 0 AND @FuelCode != '' AND @Amount != 0 AND @Price != 0 AND (SELECT orderDate FROm orders WHERE idOrder = @IDOrder) <> NULL
 	BEGIN
 		insert into orderDetails ( idOrder, fuelCode, amountFuel, pricePerLiter) values
 								 (@IDOrder, @FuelCode, @Amount, @Price);
@@ -1949,7 +1949,7 @@ select * from pumpGuns WHERE idStationNumber = 2;
 EXEC p_startFueling @ActiveGun = 5;
 
 --teraz mamy 2 możliwości:
-	klient zapłacił | klient nie zapłacił 
+	---klient zapłacił | klient nie zapłacił 
 
 ------klient płaci, podchodzi do kasy i podaje numer dystrybutora oraz mówi jak płaci i czy chce paragon czy fakture
 ---Wywołujemy procedurę odpowiedzialną za generowanie dokumenty fiskalnego
@@ -1981,14 +1981,92 @@ EXEC p_genTransactionDocument @DocType = 1,
 EXEC p_genLose @Distributor = 2 , @CarID = 'KR ZX5E4';
 
 --Dystrybutor został odblokowany, a do bazy dodany został wpis
---- mówiący o kradzieży 
+--- mówiący o kradzieży
+
+SELECY * FROM losesHistory;
 
 ```
 
-### Proces tworzenia zamówienia
+### Proces obsługi zamówień
 
 ```sql
 
+--- Rozpoczynamy stworzenie zamówienia procedurą p_addEmptyOrder
+---Podając nr nip kontraktora jako parametr
+---Tworzymy tym samym puste zamówienie coś ala 'koszyk'
 
+EXEC p_addEmptyOrder @ContractorNIP = '1345657889';
+
+--- W przypadku gdy podamy NIP, którego nie ma w bazie dostaniemy stosowną informację
+--- Należy wtedy przejść do procesu dodawania kontrachenta
+
+--- Po utworzeniu pustego zamówienia możemy swobodnie dodawać do niego nowe pozycję
+
+EXEC p_addFuelToOrder @IDOrder = 7, 
+					  @FuelCode = 'ON', 
+					  @Amount = 800, 
+					  @Price = 4.30;
+
+
+EXEC p_addFuelToOrder @IDOrder = 7, 
+					  @FuelCode = 'LPG', 
+					  @Amount = 2200, 
+					  @Price = 4.85;
+
+--- Tym sposobem mamy dodane do zamówienia nr 7 dwie pozycję
+
+select * from orderDetails WHERE idOrder = 7
+
+---Jeśli na tym chcemy zakończyć dodawanie pozycji do zamówienia
+--- uruchamiamy procedurę potwierdzenia / wysłania zamówienia
+EXEC p_confirmOrder @IDOrder = 7;
+
+--- Po przesłaniu zamówienia nie będzie moiżliwe dodania kolejnych pozycji
+
+EXEC p_addFuelToOrder @IDOrder = 7, 
+					  @FuelCode = 'PB98', 
+					  @Amount = 1800, 
+					  @Price = 5.12;
+
+--Otrzymamy błąd
+
+---Gdy zamówienie dotrze do naszej stacji możemy wykonac
+
+EXEC p_collectOrder @IDOrder = 7
+
+--- Tym samym zmienimy stan magazynowy paliw oraz dodamy datę zakończenia zamówienia
+
+```
+
+### Dodawanie i edytowanie kontrachenta 
+
+```sql
+---Lista wszystkich kontrachentów w bazie:
+select * from contractors
+
+---procedura odpowiedzialna za dodanie nowego:
+exec p_addContractor
+	@ContractorNIP = '2674511290',
+	@ContractorName = 'CarSharing',
+	@Address = 'Podwale 3',
+	@Address2 = 'Warszawa',
+	@PostalCode = '01-009',
+	@ContactNumber = '590877309' ,
+	@Email = 'kontakt@carsharing.pl',
+	@ContractorType = '0';
+
+--- Po pomyslnym dodaniu kontrachenta możemy go zobaczyć w tabeli:
+select * from contractors
+
+---Możemy również edytowac kontrachentów 
+
+UPDATE contractors SET address = 'Jurajska 14' , email = 'super@zbik.pl' WHERE idContractorNIP = '7666237322';
+
+---Po wykonaniu takiej akcji Trigger zapisze przeprowadzone zmiany również w tabeli contractorsArchive
+---Możemy dzięki temu przejrzeć historię zmian danych kontrachentów
+
+SELECT * FROM contractorsArchive
+
+ 
 
 ```
